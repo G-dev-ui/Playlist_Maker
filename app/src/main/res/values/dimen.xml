@@ -5,4 +5,5 @@
     <dimen name="icon_padding">8dp</dimen>
     <dimen name="button_margin">16dp</dimen>
     <dimen name="text2_size">16sp</dimen>
+    <dimen name="pudding_all">16sp</dimen>
 </resources>

@@ -3,8 +3,8 @@
     <string name="search_titel" translatable="false">Поиск</string>
     <string name="media_titel" translatable="false">Медиатека</string>
     <string name="settings_titel" translatable="false">Настройки</string>
-    <string name="D_W" translatable="false">Тёмная тема</string>
-    <string name="PP" translatable="false">Поделиться приложением</string>
-    <string name="NVP" translatable="false">Написать в поддержку</string>
-    <string name="PS" translatable="false">Пользовательское соглашение</string>
+    <string name="Dark_theme" translatable="false">Тёмная тема</string>
+    <string name="Share_the_app" translatable="false">Поделиться приложением</string>
+    <string name="Write_to_support" translatable="false">Написать в поддержку</string>
+    <string name="User_agreement" translatable="false">Пользовательское соглашение</string>
 </resources>
