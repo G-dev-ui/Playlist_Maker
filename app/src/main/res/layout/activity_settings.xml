@@ -15,23 +15,17 @@
         android:padding="4dp">
 
         <ImageView
+            style="@style/ImageSettingsStyle"
             android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
             android:padding="12dp"
-            android:src="@drawable/back_ic" />
+            android:src="@drawable/back_ic"/>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="8dp"
+            style="@style/TextSettingsStyle"
+            android:padding="12dp"
             android:text="@string/settings_titel"
-            android:textColor="@color/black"
             android:textSize="@dimen/text_size"
             android:textStyle="bold"
-
             />
 
 
@@ -46,16 +40,16 @@
         >
 
         <TextView
+            style="@style/TextSettingsStyle"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:layout_weight="1"
-           android:gravity="center|start"
-            android:text="@string/Dark_theme"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text2_size" />
+            android:gravity="center|start"
+            android:text="@string/Dark_theme" />
 
         <androidx.appcompat.widget.SwitchCompat
+            style="@style/SwitchStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center"
@@ -73,21 +67,15 @@
         android:padding="@dimen/pudding_all">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="1"
-
+            style="@style/TextSettingsStyle"
             android:text="@string/Share_the_app"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text2_size" />
+            />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/mode" />
+            android:id="@+id/share_the_application"
+            style="@style/ImageSettingsStyle"
+            android:src="@drawable/mode"
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -97,19 +85,13 @@
         android:padding="@dimen/pudding_all">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="1"
+            style="@style/TextSettingsStyle"
             android:text="@string/Write_to_support"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text2_size" />
+             />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"
+            android:id="@+id/write_to_support"
+            style="@style/ImageSettingsStyle"
             android:src="@drawable/group" />
     </LinearLayout>
 
@@ -120,22 +102,15 @@
         android:padding="@dimen/pudding_all">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="1"
+            style="@style/TextSettingsStyle"
             android:text="@string/User_agreement"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text2_size" />
+             />
 
         <ImageView
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center"
-            android:layout_marginEnd="12dp"
+            android:id="@+id/user_agreement"
+            style="@style/ImageSettingsStyle"
             android:src="@drawable/light"
-            app:iconPadding="16dp" />
+             />
     </LinearLayout>
 
 </LinearLayout>

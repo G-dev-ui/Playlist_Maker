@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Menu">
+       <item name="android:background">@color/blue</item>
+    </style>
+
+    <style name="ButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_marginBottom">@dimen/button_margin</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/text_size</item>
+        <item name="cornerRadius">@dimen/radius</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/icon_padding</item>
+        <item name="iconTint">@color/black</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">500</item>
+    </style>
+    <style name="TextSettingsStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">start</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/text2_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+    <style name="ImageSettingsStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">end|center</item>
+        <item name="android:layout_marginEnd">12dp</item>
+
+    </style>
+    <style name="EditColorStily">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textColorHint">#AEAFB4</item>
+    </style>
+</resources>
