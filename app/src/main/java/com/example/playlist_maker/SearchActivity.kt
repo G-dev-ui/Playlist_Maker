@@ -1,17 +1,20 @@
 package com.example.playlist_maker
 
 import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.core.view.isVisible
 
 class SearchActivity : AppCompatActivity() {
+    companion object {
+        private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
+    }
+
     private var editTextValue = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,12 +34,7 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 editTextValue = s.toString()
-
-                if (s.isNotEmpty()) {
-                    resetButton.visibility = View.VISIBLE
-                } else {
-                    resetButton.visibility = View.GONE
-                }
+                resetButton.isVisible = s.isNotEmpty()
             }
 
             override fun afterTextChanged(s: Editable) {}
@@ -44,24 +42,18 @@ class SearchActivity : AppCompatActivity() {
 
         resetButton.setOnClickListener {
             searchBar.text.clear()
-            resetButton.visibility = View.GONE
+            resetButton.isVisible = false
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(searchBar.windowToken, 0)
         }
 
-        if (savedInstanceState != null) {
-            editTextValue = savedInstanceState.getString("editTextValue", "")
-            searchBar.setText(editTextValue)
-        }
+        editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
+        searchBar.setText(editTextValue)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("editTextValue", editTextValue)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        editTextValue = savedInstanceState.getString("editTextValue", "")
+        outState.putString(EDIT_TEXT_VALUE_KEY, editTextValue)
     }
 }
+
