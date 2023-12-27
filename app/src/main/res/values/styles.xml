@@ -41,4 +41,13 @@
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">#AEAFB4</item>
     </style>
+    <style name="TrackNameStily">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+
+    </style>
+    <style name="TrackTimeAndArtist">
+        <item name="android:textColor">#AEAFB4</item>
+        <item name="android:textSize">11sp</item>
+    </style>
 </resources>
