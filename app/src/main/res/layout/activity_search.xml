@@ -24,6 +24,7 @@
             android:textSize="@dimen/text_size"
             android:textStyle="bold" />
     </LinearLayout>
+
    <FrameLayout
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
@@ -46,6 +47,8 @@
            android:inputType="text"
            android:maxLines="1"
            android:minHeight="48dp"
+           android:imeOptions="actionDone"
+           android:singleLine="true"
 
            />
 
@@ -59,12 +62,166 @@
            android:src="@drawable/reset" />
 
    </FrameLayout>
+    <FrameLayout
+        android:id="@+id/empty_result_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:visibility="gone"
+        >
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+        <RelativeLayout
+            android:id="@+id/smail"
+            android:layout_gravity="center"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:src="@drawable/smail_l" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="37dp"
+                android:layout_marginTop="28dp"
+                android:src="@drawable/smail" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/smail_r"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="81dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="6dp"
+
+                />
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/smail"
+            android:layout_marginTop="16dp"
+            android:text="Ничего не нашлось"
+            style="@style/TextColor"
+            android:textStyle="bold" />
+
+</LinearLayout>
+    </FrameLayout>
+    <FrameLayout
+        android:id="@+id/error_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:visibility="gone"
+        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center">
+        <RelativeLayout
+            android:layout_gravity="center"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="3dp"
+                android:src="@drawable/smail_l" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="37dp"
+                android:layout_marginTop="28dp"
+                android:src="@drawable/smail_2" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/smail_r"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="81dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="6dp"
+                />
+
+            
+
+
+        </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Проблемы со связью"
+                android:textStyle="bold"
+                style="@style/TextColor"
+                android:layout_marginTop="16dp"
+                android:layout_gravity="center"
+                android:id="@+id/error_message" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Загрузка не удалась. Проверьте подключение к интернету"
+                style="@style/TextColor"
+                android:textStyle="bold"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="center"
+
+                android:layout_marginTop="8dp" />
+
+        <Button
+            android:layout_gravity="center"
+            android:id="@+id/refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/ButtomReset"
+            android:layout_below="@id/error_message"
+            android:layout_marginTop="24dp"
+            android:text="Обновить"
+
+
+
+            />
+</LinearLayout>
+    </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_track"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+
+        />
+
+
 
 </LinearLayout>
 
