@@ -7,7 +7,7 @@ data class Track(
     val artworkUrl100: String
 ){
     companion object {
-        private const val MAX_TRACK_NAME_LENGTH = 20
+        private const val MAX_TRACK_NAME_LENGTH = 35
         private const val MAX_ARTIST_NAME_LENGTH = 15
         private const val ELLIPSIS = "..."
 

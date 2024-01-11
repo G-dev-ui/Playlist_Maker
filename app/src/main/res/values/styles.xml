@@ -40,6 +40,7 @@
     <style name="EditColorStily">
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">#AEAFB4</item>
+        <item name="android:textCursorDrawable">@drawable/custom_cursor</item>
     </style>
     <style name="TrackNameStily">
         <item name="android:textColor">@color/black</item>
@@ -62,4 +63,5 @@
         <item name="android:textColor">@color/black</item>
         <item name="fontFamily">@font/ys_display_medium</item>
     </style>
+
 </resources>

@@ -23,9 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
-    companion object {
-        private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
-    }
+
 
     private var editTextValue = ""
 
@@ -36,7 +34,10 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var refreshButton: Button
     private var currentTracks: List<Track> = emptyList()
 
-
+    companion object {
+        private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
+        private const val BASE_URL = "https://itunes.apple.com"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +54,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://itunes.apple.com")
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -103,6 +104,10 @@ class SearchActivity : AppCompatActivity() {
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
                 performSearch(searchBar.text.toString())
+
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(searchBar.windowToken, 0)
+
                 true
             } else {
                 false
