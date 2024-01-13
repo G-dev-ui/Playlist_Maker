@@ -17,7 +17,7 @@ class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     private val artworkUrlView: ImageView = itemView.findViewById(R.id.image_track)
 
     fun bind(model: Track){
-        val shortenedTrackName = Track.getShortenedTrackName(model.trackName)
+        val shortenedTrackName = (model.trackName)
         val shortenedArtistName = Track.getShortenedArtistName(model.artistName)
 
         trackNameView.text = shortenedTrackName

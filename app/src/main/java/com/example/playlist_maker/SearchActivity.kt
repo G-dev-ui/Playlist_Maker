@@ -146,36 +146,40 @@ class SearchActivity : AppCompatActivity() {
                 call: Call<SearchResponse>,
                 response: Response<SearchResponse>
             ) {
-                if (response.isSuccessful) {
-                    val searchResponse = response.body()
-                    if (searchResponse != null) {
-                        val tracks = searchResponse.results.map { result ->
-                            Track(
-                                result.trackName,
-                                result.artistName,
-                                SimpleDateFormat("mm:ss", Locale.getDefault()).format(result.trackTimeMillis),
-                                result.artworkUrl100
-                            )
-                        }
+                if (query == editTextValue) {
+                    if (response.isSuccessful) {
+                        val searchResponse = response.body()
+                        if (searchResponse != null) {
+                            val tracks = searchResponse.results.map { result ->
+                                Track(
+                                    result.trackName,
+                                    result.artistName,
+                                    SimpleDateFormat("mm:ss", Locale.getDefault()).format(result.trackTimeMillis),
+                                    result.artworkUrl100
+                                )
+                            }
 
-                        if (tracks.isEmpty() && query.isNotEmpty()) {
-                            showEmptyResultPlaceholder()
-                            trackAdapter.updateTracks(emptyList())
+                            if (tracks.isEmpty() && query.isNotEmpty()) {
+                                showEmptyResultPlaceholder()
+                                trackAdapter.updateTracks(emptyList())
+                            } else {
+                                hidePlaceholders()
+                                trackAdapter.updateTracks(tracks)
+                                currentTracks = tracks
+                            }
                         } else {
-                            hidePlaceholders()
-                            trackAdapter.updateTracks(tracks)
-                            currentTracks = tracks
+                            showErrorPlaceholder()
                         }
                     } else {
                         showErrorPlaceholder()
                     }
-                } else {
-                    showErrorPlaceholder()
                 }
             }
 
             override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                showErrorPlaceholder()
+                if (query == editTextValue) {
+                    showErrorPlaceholder()
+                }
             }
         })
     }
