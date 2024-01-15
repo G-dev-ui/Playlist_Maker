@@ -37,6 +37,7 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
         private const val BASE_URL = "https://itunes.apple.com"
+        private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,13 +125,24 @@ class SearchActivity : AppCompatActivity() {
         hidePlaceholders()
         emptyResultPlaceholder.visibility = View.VISIBLE
 
-
+        trackAdapter.updateTracks(emptyList())
+        hideTrackList()
     }
 
     private fun showErrorPlaceholder() {
         hidePlaceholders()
         errorPlaceholder.visibility = View.VISIBLE
+        trackAdapter.updateTracks(emptyList())
+        hideTrackList()
+    }
+    private fun hideTrackList() {
+        val rvTrack = findViewById<RecyclerView>(R.id.rv_track)
+        rvTrack.visibility = View.GONE
+    }
 
+    private fun showTrackList() {
+        val rvTrack = findViewById<RecyclerView>(R.id.rv_track)
+        rvTrack.visibility = View.VISIBLE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -154,7 +166,7 @@ class SearchActivity : AppCompatActivity() {
                                 Track(
                                     result.trackName,
                                     result.artistName,
-                                    SimpleDateFormat("mm:ss", Locale.getDefault()).format(result.trackTimeMillis),
+                                    timeFormatter.format(result.trackTimeMillis),
                                     result.artworkUrl100
                                 )
                             }
@@ -166,6 +178,7 @@ class SearchActivity : AppCompatActivity() {
                                 hidePlaceholders()
                                 trackAdapter.updateTracks(tracks)
                                 currentTracks = tracks
+                                showTrackList()
                             }
                         } else {
                             showErrorPlaceholder()

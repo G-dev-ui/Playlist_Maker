@@ -17,11 +17,10 @@ class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     private val artworkUrlView: ImageView = itemView.findViewById(R.id.image_track)
 
     fun bind(model: Track){
-        val shortenedTrackName = (model.trackName)
-        val shortenedArtistName = Track.getShortenedArtistName(model.artistName)
 
-        trackNameView.text = shortenedTrackName
-        artistNameView.text = shortenedArtistName
+
+        trackNameView.text = model.trackName
+        artistNameView.text = model.artistName
         trackTimeView.text = model.trackTime
 
         Glide.with(itemView)
