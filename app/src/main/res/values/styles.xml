@@ -40,6 +40,7 @@
     <style name="EditColorStily">
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">#AEAFB4</item>
+        <item name="android:textCursorDrawable">@drawable/custom_cursor</item>
     </style>
     <style name="TrackNameStily">
         <item name="android:textColor">@color/black</item>
@@ -50,4 +51,18 @@
         <item name="android:textColor">#AEAFB4</item>
         <item name="android:textSize">11sp</item>
     </style>
+    <style name="ButtomReset">
+        <item name="android:textColor">@color/white</item>
+        <item name="backgroundTint">@color/black</item>
+        <item name="cornerRadius">54dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/ys_display_medium</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="TextColor">
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="fontFamily">@font/ys_display_medium</item>
+    </style>
+
 </resources>

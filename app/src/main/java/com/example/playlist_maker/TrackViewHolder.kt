@@ -17,9 +17,12 @@ class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     private val artworkUrlView: ImageView = itemView.findViewById(R.id.image_track)
 
     fun bind(model: Track){
+
+
         trackNameView.text = model.trackName
         artistNameView.text = model.artistName
         trackTimeView.text = model.trackTime
+
         Glide.with(itemView)
             .load(model.artworkUrl100)
             .centerCrop()
@@ -28,10 +31,13 @@ class TrackViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
             .into(artworkUrlView)
     }
 
+
     private fun dpToPx(dp: Float, context: Context): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
             context.resources.displayMetrics).toInt()
     }
+
 }
+
