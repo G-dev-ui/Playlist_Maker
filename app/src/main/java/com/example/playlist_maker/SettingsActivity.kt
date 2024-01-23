@@ -16,7 +16,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         val themeSwitch = findViewById<SwitchCompat>(R.id.theme_switch)
-        themeSwitch.isChecked = isDarkThemeEnabled()
+        themeSwitch.isChecked = (applicationContext as App).darkTheme
 
         val backButton = findViewById<ImageView>(R.id.image)
         backButton.setOnClickListener {
@@ -47,20 +47,17 @@ class SettingsActivity : AppCompatActivity() {
 
         val agreementButton = findViewById<ImageView>(R.id.user_agreement)
         agreementButton.setOnClickListener {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.offer_link)))
+            val browserIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.offer_link)))
             startActivity(browserIntent)
 
         }
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+                (applicationContext as App).switchTheme(isChecked)
             }
+        }
+
+
     }
-}
-    private fun isDarkThemeEnabled(): Boolean {
-        return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-    }
-}
 

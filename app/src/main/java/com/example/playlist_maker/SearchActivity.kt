@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,6 @@ import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
 
-
     private var editTextValue = ""
 
     private lateinit var itunesApiService: ItunesApiService
@@ -32,12 +32,17 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var emptyResultPlaceholder: View
     private lateinit var errorPlaceholder: View
     private lateinit var refreshButton: Button
+    private lateinit var searchHistoryLayout: LinearLayout
+    private lateinit var clearHistoryButton: Button
+    private lateinit var searchHistoryRecyclerView: RecyclerView
+    private lateinit var searchHistory: SearchHistory
+    private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var currentTracks: List<Track> = emptyList()
+    private var isSearchInProgress = false
 
     companion object {
         private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
         private const val BASE_URL = "https://itunes.apple.com"
-        private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +52,9 @@ class SearchActivity : AppCompatActivity() {
         emptyResultPlaceholder = findViewById(R.id.empty_result_placeholder)
         errorPlaceholder = findViewById(R.id.error_placeholder)
         refreshButton = findViewById(R.id.refresh_button)
+        searchHistoryLayout = findViewById(R.id.search_history)
+        clearHistoryButton = findViewById(R.id.clearing_history)
+        searchHistoryRecyclerView = findViewById(R.id.track_history)
 
         hidePlaceholders()
 
@@ -73,6 +81,8 @@ class SearchActivity : AppCompatActivity() {
         rvTrack.layoutManager = LinearLayoutManager(this)
         rvTrack.adapter = trackAdapter
 
+        searchHistory = SearchHistory(getSharedPreferences("SearchHistory", Context.MODE_PRIVATE))
+
         searchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
@@ -89,24 +99,67 @@ class SearchActivity : AppCompatActivity() {
                 editTextValue = ""
                 searchBar.setText("")
 
-                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val inputMethodManager =
+                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(searchBar.windowToken, 0)
 
                 resetButton.isVisible = false
 
                 hidePlaceholders()
                 trackAdapter.updateTracks(emptyList())
+
+                if (searchHistory.getSearchHistory().isNotEmpty()) {
+                    showSearchHistory()
+                } else {
+                    searchHistoryLayout.visibility = View.GONE
+                }
             }
         }
 
         editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
         searchBar.setText(editTextValue)
 
+
+        searchBar.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                if (searchHistory.getSearchHistory().isNotEmpty() && searchBar.text.isEmpty()) {
+                    searchHistoryLayout.visibility = View.VISIBLE
+                } else {
+                    searchHistoryLayout.visibility = View.GONE
+                }
+            } else {
+                searchHistoryLayout.visibility = View.GONE
+            }
+        }
+        searchBar.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                val searchHistoryLayout = findViewById<LinearLayout>(R.id.search_history)
+                editTextValue = s.toString()
+                resetButton.isVisible = s.isNotEmpty()
+                if (!isSearchInProgress && s.isEmpty()) {
+                    hidePlaceholders()
+                    trackAdapter.updateTracks(emptyList())
+                }
+                if (searchHistory.getSearchHistory().isNotEmpty() && s.isEmpty()) {
+                    searchHistoryLayout.visibility = View.VISIBLE
+                } else {
+                    searchHistoryLayout.visibility = View.GONE
+                }
+            }
+
+            override fun afterTextChanged(s: Editable) {}
+        })
+
+
+
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
                 performSearch(searchBar.text.toString())
 
-                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val inputMethodManager =
+                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(searchBar.windowToken, 0)
 
                 true
@@ -114,6 +167,8 @@ class SearchActivity : AppCompatActivity() {
                 false
             }
         }
+
+        showSearchHistory()
     }
 
     private fun hidePlaceholders() {
@@ -135,6 +190,7 @@ class SearchActivity : AppCompatActivity() {
         trackAdapter.updateTracks(emptyList())
         hideTrackList()
     }
+
     private fun hideTrackList() {
         val rvTrack = findViewById<RecyclerView>(R.id.rv_track)
         rvTrack.visibility = View.GONE
@@ -151,54 +207,86 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun performSearch(query: String) {
-        val call = itunesApiService.search(query)
+        if (query.isNotEmpty()) {
+            val call = itunesApiService.search(query)
 
-        call.enqueue(object : Callback<SearchResponse> {
-            override fun onResponse(
-                call: Call<SearchResponse>,
-                response: Response<SearchResponse>
-            ) {
-                if (query == editTextValue) {
-                    if (response.isSuccessful) {
-                        val searchResponse = response.body()
-                        if (searchResponse != null) {
-                            val tracks = searchResponse.results.map { result ->
-                                Track(
-                                    result.trackName,
-                                    result.artistName,
-                                    timeFormatter.format(result.trackTimeMillis),
-                                    result.artworkUrl100
-                                )
-                            }
+            call.enqueue(object : Callback<SearchResponse> {
+                override fun onResponse(
+                    call: Call<SearchResponse>,
+                    response: Response<SearchResponse>
+                ) {
+                    if (query == editTextValue) {
+                        if (response.isSuccessful) {
+                            val searchResponse = response.body()
+                            if (searchResponse != null) {
+                                val tracks = searchResponse.results.map { result ->
+                                    Track(
+                                        result.trackId,
+                                        result.trackName,
+                                        result.artistName,
+                                        timeFormatter.format(result.trackTimeMillis),
+                                        result.artworkUrl100
+                                    )
+                                }
 
-                            if (tracks.isEmpty() && query.isNotEmpty()) {
-                                showEmptyResultPlaceholder()
-                                trackAdapter.updateTracks(emptyList())
+                                if (tracks.isEmpty() && query.isNotEmpty()) {
+                                    showEmptyResultPlaceholder()
+                                    trackAdapter.updateTracks(emptyList())
+                                } else {
+                                    hidePlaceholders()
+                                    trackAdapter.updateTracks(tracks)
+                                    currentTracks = tracks
+                                    showTrackList()
+
+                                    trackAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
+                                        override fun onItemClick(position: Int) {
+                                            val selectedTrack = tracks[position]
+                                            searchHistory.addSearchTrack(selectedTrack)
+                                        }
+                                    })
+                                }
                             } else {
-                                hidePlaceholders()
-                                trackAdapter.updateTracks(tracks)
-                                currentTracks = tracks
-                                showTrackList()
+                                showErrorPlaceholder()
                             }
                         } else {
                             showErrorPlaceholder()
                         }
-                    } else {
+                    }
+                }
+
+                override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                    if (query == editTextValue) {
                         showErrorPlaceholder()
                     }
                 }
-            }
+            })
+        } else {
 
-            override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                if (query == editTextValue) {
-                    showErrorPlaceholder()
-                }
-            }
-        })
+            hidePlaceholders()
+            trackAdapter.updateTracks(emptyList())
+        }
     }
 
+    private fun showSearchHistory() {
+        val searchHistoryList = searchHistory.getSearchHistory()
+
+        if (searchHistoryList.isNotEmpty()) {
+            searchHistoryLayout.visibility = View.VISIBLE
+
+            val historyAdapter = TrackAdapter(searchHistoryList.toMutableList())
+            searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
+            searchHistoryRecyclerView.adapter = historyAdapter
+
+
+
+            clearHistoryButton.setOnClickListener {
+                searchHistory.clearSearchHistory()
+                searchHistoryLayout.visibility = View.GONE
+            }
+        } else {
+            searchHistoryLayout.visibility = View.GONE
+        }
+    }
 }
-
-
 
 

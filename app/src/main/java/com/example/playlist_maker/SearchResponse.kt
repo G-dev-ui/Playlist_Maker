@@ -7,6 +7,7 @@ data class SearchResponse(
     @SerializedName("results") val results: List<Result>
 )
 data class Result(
+    @SerializedName("trackId") val trackId: Long,
     @SerializedName("trackName") val trackName: String,
     @SerializedName("artistName") val artistName: String,
     @SerializedName("trackTimeMillis") val trackTimeMillis: Long,

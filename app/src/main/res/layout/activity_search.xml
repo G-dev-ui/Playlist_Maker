@@ -66,6 +66,45 @@
 
     </FrameLayout>
 
+    <LinearLayout
+        android:id="@+id/search_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Вы искавли"
+            style="@style/TextColor"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+
+            />
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/track_history"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+       android:scrollbars="vertical"/>
+
+<Button
+    android:id="@+id/clearing_history"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    style="@style/ButtomReset"
+    android:textSize="16sp"
+    android:layout_marginTop="24dp"
+    android:text="Очистить историю"
+    android:layout_gravity="center"
+    />
+
+
+
+
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/empty_result_placeholder"
         android:layout_width="wrap_content"
