@@ -6,6 +6,15 @@ import androidx.recyclerview.widget.RecyclerView
 
 class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
 
+    private var itemClickListener: OnItemClickListener? = null
+
+    interface OnItemClickListener {
+        fun onItemClick(position: Int)
+    }
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.itemClickListener = listener
+    }
 
     fun updateTracks(newTracks: List<Track>) {
         tracks.clear()
@@ -14,16 +23,6 @@ class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapte
     }
 
 
-    fun addTrack(track: Track) {
-        tracks.add(track)
-        notifyItemInserted(tracks.size - 1)
-    }
-
-
-    fun removeTrack(position: Int) {
-        tracks.removeAt(position)
-        notifyItemRemoved(position)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.track_viwe, parent, false)
@@ -37,5 +36,9 @@ class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapte
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
         holder.bind(track)
+
+        holder.itemView.setOnClickListener {
+            itemClickListener?.onItemClick(position)
+        }
     }
 }

@@ -48,7 +48,7 @@
             android:gravity="center|start"
             android:text="@string/Dark_theme" />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/theme_switch"
             style="@style/SwitchStyle"
             android:layout_width="wrap_content"
@@ -56,7 +56,8 @@
             android:layout_gravity="end|center"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="6dp"
-            android:layout_marginBottom="11dp" />
+            android:layout_marginBottom="11dp"
+           />
 
 
     </LinearLayout>
