@@ -6,4 +6,6 @@
     <dimen name="button_margin">16dp</dimen>
     <dimen name="text2_size">16sp</dimen>
     <dimen name="pudding_all">16sp</dimen>
+    <dimen name="borders24_line">24dp</dimen>
+    <dimen name="borders16_line">16dp</dimen>
 </resources>

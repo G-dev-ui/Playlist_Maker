@@ -11,5 +11,9 @@ data class Result(
     @SerializedName("trackName") val trackName: String,
     @SerializedName("artistName") val artistName: String,
     @SerializedName("trackTimeMillis") val trackTimeMillis: Long,
-    @SerializedName("artworkUrl100") val artworkUrl100: String
+    @SerializedName("artworkUrl100") val artworkUrl100: String,
+    @SerializedName("collectionName") val collectionName: String,
+    @SerializedName("releaseDate") val releaseDate: String,
+    @SerializedName("primaryGenreName") val primaryGenreName: String,
+    @SerializedName("country") val country: String
 )
