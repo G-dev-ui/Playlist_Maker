@@ -1,8 +1,12 @@
 package com.example.playlist_maker
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -38,11 +42,22 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var searchHistory: SearchHistory
     private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var currentTracks: List<Track> = emptyList()
-    private var isSearchInProgress = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable {
+        performSearch(editTextValue)
+        searchHistoryLayout.visibility = View.GONE
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
 
     companion object {
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
         private const val BASE_URL = "https://itunes.apple.com"
+        private const val MEDIA_ACTIVITY_REQUEST_CODE = 1001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +134,6 @@ class SearchActivity : AppCompatActivity() {
         editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
         searchBar.setText(editTextValue)
 
-
         searchBar.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 if (searchHistory.getSearchHistory().isNotEmpty() && searchBar.text.isEmpty()) {
@@ -135,24 +149,13 @@ class SearchActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                val searchHistoryLayout = findViewById<LinearLayout>(R.id.search_history)
                 editTextValue = s.toString()
                 resetButton.isVisible = s.isNotEmpty()
-                if (!isSearchInProgress && s.isEmpty()) {
-                    hidePlaceholders()
-                    trackAdapter.updateTracks(emptyList())
-                }
-                if (searchHistory.getSearchHistory().isNotEmpty() && s.isEmpty()) {
-                    searchHistoryLayout.visibility = View.VISIBLE
-                } else {
-                    searchHistoryLayout.visibility = View.GONE
-                }
+                searchDebounce()
             }
 
             override fun afterTextChanged(s: Editable) {}
         })
-
-
 
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
@@ -225,8 +228,13 @@ class SearchActivity : AppCompatActivity() {
                                         result.trackName,
                                         result.artistName,
                                         timeFormatter.format(result.trackTimeMillis),
-                                        result.artworkUrl100
-                                    )
+                                            result.artworkUrl100,
+                                        result.collectionName,
+                                        result.releaseDate,
+                                        result.primaryGenreName,
+                                        result.country
+
+                                        )
                                 }
 
                                 if (tracks.isEmpty() && query.isNotEmpty()) {
@@ -240,7 +248,12 @@ class SearchActivity : AppCompatActivity() {
 
                                     trackAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                                         override fun onItemClick(position: Int) {
-                                            val selectedTrack = tracks[position]
+                                            val selectedTrack = if (searchHistoryLayout.visibility == View.VISIBLE) {
+                                                searchHistory.getSearchHistory()[position]
+                                            } else {
+                                                currentTracks[position]
+                                            }
+                                            redirectToAudioPlayer(selectedTrack)
                                             searchHistory.addSearchTrack(selectedTrack)
                                         }
                                     })
@@ -261,9 +274,29 @@ class SearchActivity : AppCompatActivity() {
                 }
             })
         } else {
-
             hidePlaceholders()
             trackAdapter.updateTracks(emptyList())
+        }
+    }
+
+    private fun redirectToAudioPlayer(track: Track) {
+        val intent = Intent(this, MediaActivity::class.java)
+        intent.putExtra("trackId", track.trackId)
+        intent.putExtra("trackName", track.trackName)
+        intent.putExtra("artistName", track.artistName)
+        intent.putExtra("trackTime", track.trackTime)
+        intent.putExtra("artworkUrl100", track.artworkUrl100)
+        intent.putExtra("collectionName", track.collectionName)
+        intent.putExtra("releaseDate", track.releaseDate)
+        intent.putExtra("primaryGenreName", track.primaryGenreName)
+        intent.putExtra("country", track.country)
+        startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MEDIA_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
         }
     }
 
@@ -277,7 +310,12 @@ class SearchActivity : AppCompatActivity() {
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
 
-
+            historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
+                override fun onItemClick(position: Int) {
+                    val selectedTrack = searchHistoryList[position]
+                    redirectToAudioPlayer(selectedTrack)
+                }
+            })
 
             clearHistoryButton.setOnClickListener {
                 searchHistory.clearSearchHistory()
