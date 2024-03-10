@@ -1,6 +1,8 @@
 package com.example.playlist_maker
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -43,6 +45,7 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
         private const val BASE_URL = "https://itunes.apple.com"
+        private const val MEDIA_ACTIVITY_REQUEST_CODE = 1001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +122,6 @@ class SearchActivity : AppCompatActivity() {
         editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
         searchBar.setText(editTextValue)
 
-
         searchBar.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 if (searchHistory.getSearchHistory().isNotEmpty() && searchBar.text.isEmpty()) {
@@ -151,8 +153,6 @@ class SearchActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable) {}
         })
-
-
 
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
@@ -225,8 +225,13 @@ class SearchActivity : AppCompatActivity() {
                                         result.trackName,
                                         result.artistName,
                                         timeFormatter.format(result.trackTimeMillis),
-                                        result.artworkUrl100
-                                    )
+                                            result.artworkUrl100,
+                                        result.collectionName,
+                                        result.releaseDate,
+                                        result.primaryGenreName,
+                                        result.country
+
+                                        )
                                 }
 
                                 if (tracks.isEmpty() && query.isNotEmpty()) {
@@ -240,7 +245,12 @@ class SearchActivity : AppCompatActivity() {
 
                                     trackAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                                         override fun onItemClick(position: Int) {
-                                            val selectedTrack = tracks[position]
+                                            val selectedTrack = if (searchHistoryLayout.visibility == View.VISIBLE) {
+                                                searchHistory.getSearchHistory()[position]
+                                            } else {
+                                                currentTracks[position]
+                                            }
+                                            redirectToAudioPlayer(selectedTrack)
                                             searchHistory.addSearchTrack(selectedTrack)
                                         }
                                     })
@@ -261,9 +271,29 @@ class SearchActivity : AppCompatActivity() {
                 }
             })
         } else {
-
             hidePlaceholders()
             trackAdapter.updateTracks(emptyList())
+        }
+    }
+
+    private fun redirectToAudioPlayer(track: Track) {
+        val intent = Intent(this, MediaActivity::class.java)
+        intent.putExtra("trackId", track.trackId)
+        intent.putExtra("trackName", track.trackName)
+        intent.putExtra("artistName", track.artistName)
+        intent.putExtra("trackTime", track.trackTime)
+        intent.putExtra("artworkUrl100", track.artworkUrl100)
+        intent.putExtra("collectionName", track.collectionName)
+        intent.putExtra("releaseDate", track.releaseDate)
+        intent.putExtra("primaryGenreName", track.primaryGenreName)
+        intent.putExtra("country", track.country)
+        startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MEDIA_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
         }
     }
 
@@ -277,7 +307,12 @@ class SearchActivity : AppCompatActivity() {
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
 
-
+            historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
+                override fun onItemClick(position: Int) {
+                    val selectedTrack = searchHistoryList[position]
+                    redirectToAudioPlayer(selectedTrack)
+                }
+            })
 
             clearHistoryButton.setOnClickListener {
                 searchHistory.clearSearchHistory()
