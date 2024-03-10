@@ -142,7 +142,6 @@ class SearchActivity : AppCompatActivity() {
         editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
         searchBar.setText(editTextValue)
 
-
         searchBar.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 if (searchHistory.getSearchHistory().isNotEmpty() && searchBar.text.isEmpty()) {
@@ -165,8 +164,6 @@ class SearchActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable) {}
         })
-
-
 
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
@@ -240,12 +237,21 @@ class SearchActivity : AppCompatActivity() {
                                         result.trackName,
                                         result.artistName,
                                         timeFormatter.format(result.trackTimeMillis),
+
                                         result.artworkUrl100,
+
+                                            result.artworkUrl100,
+
                                         result.collectionName,
                                         result.releaseDate,
                                         result.primaryGenreName,
                                         result.country
+
                                     )
+
+
+                                        )
+
                                 }
 
                                 if (tracks.isEmpty() && query.isNotEmpty()) {
@@ -286,7 +292,6 @@ class SearchActivity : AppCompatActivity() {
                 }
             })
         } else {
-
             hidePlaceholders()
             trackAdapter.updateTracks(emptyList())
         }
@@ -309,8 +314,32 @@ class SearchActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == MEDIA_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
 
+
         }
     }
+
+    private fun redirectToAudioPlayer(track: Track) {
+        val intent = Intent(this, MediaActivity::class.java)
+        intent.putExtra("trackId", track.trackId)
+        intent.putExtra("trackName", track.trackName)
+        intent.putExtra("artistName", track.artistName)
+        intent.putExtra("trackTime", track.trackTime)
+        intent.putExtra("artworkUrl100", track.artworkUrl100)
+        intent.putExtra("collectionName", track.collectionName)
+        intent.putExtra("releaseDate", track.releaseDate)
+        intent.putExtra("primaryGenreName", track.primaryGenreName)
+        intent.putExtra("country", track.country)
+        startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MEDIA_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+        }
+    }
+
+
     private fun showSearchHistory() {
         val searchHistoryList = searchHistory.getSearchHistory()
 
@@ -320,6 +349,10 @@ class SearchActivity : AppCompatActivity() {
             val historyAdapter = TrackAdapter(searchHistoryList.toMutableList())
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
+
+
+
+
             historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedTrack = searchHistoryList[position]
