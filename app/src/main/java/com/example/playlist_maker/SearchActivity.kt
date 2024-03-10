@@ -1,13 +1,8 @@
 package com.example.playlist_maker
 
-import android.app.ActionBar
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -17,7 +12,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -42,33 +36,19 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryButton: Button
     private lateinit var searchHistoryRecyclerView: RecyclerView
     private lateinit var searchHistory: SearchHistory
-    private lateinit var progressBar: ProgressBar
     private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var currentTracks: List<Track> = emptyList()
-    private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable {
-        performSearch(editTextValue)
-        searchHistoryLayout.visibility = View.GONE
-    }
-
-    private fun searchDebounce() {
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
-    }
-
-
+    private var isSearchInProgress = false
 
     companion object {
-        private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val EDIT_TEXT_VALUE_KEY = "editTextValue"
         private const val BASE_URL = "https://itunes.apple.com"
-        private const val MEDIA_ACTIVITY_REQUEST_CODE = 1001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-        progressBar = findViewById(R.id.progressBar)
+
         emptyResultPlaceholder = findViewById(R.id.empty_result_placeholder)
         errorPlaceholder = findViewById(R.id.error_placeholder)
         refreshButton = findViewById(R.id.refresh_button)
@@ -77,12 +57,10 @@ class SearchActivity : AppCompatActivity() {
         searchHistoryRecyclerView = findViewById(R.id.track_history)
 
         hidePlaceholders()
-if (::refreshButton.isInitialized) {
-    refreshButton.setOnClickListener {
-        performSearch(editTextValue)
-    }
-}
 
+        refreshButton.setOnClickListener {
+            performSearch(editTextValue)
+        }
 
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -98,7 +76,6 @@ if (::refreshButton.isInitialized) {
         val rvTrack = findViewById<RecyclerView>(R.id.rv_track)
         val searchBar = findViewById<EditText>(R.id.search_bar)
         val resetButton = findViewById<ImageView>(R.id.reset_button)
-
 
         trackAdapter = TrackAdapter(mutableListOf())
         rvTrack.layoutManager = LinearLayoutManager(this)
@@ -142,6 +119,7 @@ if (::refreshButton.isInitialized) {
         editTextValue = savedInstanceState?.getString(EDIT_TEXT_VALUE_KEY, "") ?: ""
         searchBar.setText(editTextValue)
 
+
         searchBar.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 if (searchHistory.getSearchHistory().isNotEmpty() && searchBar.text.isEmpty()) {
@@ -153,20 +131,28 @@ if (::refreshButton.isInitialized) {
                 searchHistoryLayout.visibility = View.GONE
             }
         }
-
-
-
         searchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                val searchHistoryLayout = findViewById<LinearLayout>(R.id.search_history)
                 editTextValue = s.toString()
                 resetButton.isVisible = s.isNotEmpty()
-                searchDebounce()
+                if (!isSearchInProgress && s.isEmpty()) {
+                    hidePlaceholders()
+                    trackAdapter.updateTracks(emptyList())
+                }
+                if (searchHistory.getSearchHistory().isNotEmpty() && s.isEmpty()) {
+                    searchHistoryLayout.visibility = View.VISIBLE
+                } else {
+                    searchHistoryLayout.visibility = View.GONE
+                }
             }
 
             override fun afterTextChanged(s: Editable) {}
         })
+
+
 
         searchBar.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
@@ -222,16 +208,13 @@ if (::refreshButton.isInitialized) {
 
     private fun performSearch(query: String) {
         if (query.isNotEmpty()) {
-
-
             val call = itunesApiService.search(query)
-            progressBar.visibility = View.GONE
+
             call.enqueue(object : Callback<SearchResponse> {
                 override fun onResponse(
                     call: Call<SearchResponse>,
                     response: Response<SearchResponse>
                 ) {
-                    progressBar.visibility = View.VISIBLE
                     if (query == editTextValue) {
                         if (response.isSuccessful) {
                             val searchResponse = response.body()
@@ -242,13 +225,8 @@ if (::refreshButton.isInitialized) {
                                         result.trackName,
                                         result.artistName,
                                         timeFormatter.format(result.trackTimeMillis),
-                                            result.artworkUrl100,
-                                        result.collectionName,
-                                        result.releaseDate,
-                                        result.primaryGenreName,
-                                        result.country
-
-                                        )
+                                        result.artworkUrl100
+                                    )
                                 }
 
                                 if (tracks.isEmpty() && query.isNotEmpty()) {
@@ -262,12 +240,7 @@ if (::refreshButton.isInitialized) {
 
                                     trackAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                                         override fun onItemClick(position: Int) {
-                                            val selectedTrack = if (searchHistoryLayout.visibility == View.VISIBLE) {
-                                                searchHistory.getSearchHistory()[position]
-                                            } else {
-                                                currentTracks[position]
-                                            }
-                                            redirectToAudioPlayer(selectedTrack)
+                                            val selectedTrack = tracks[position]
                                             searchHistory.addSearchTrack(selectedTrack)
                                         }
                                     })
@@ -282,37 +255,15 @@ if (::refreshButton.isInitialized) {
                 }
 
                 override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
-                   progressBar.visibility = View.VISIBLE
                     if (query == editTextValue) {
-
                         showErrorPlaceholder()
                     }
                 }
             })
         } else {
+
             hidePlaceholders()
             trackAdapter.updateTracks(emptyList())
-        }
-    }
-
-    private fun redirectToAudioPlayer(track: Track) {
-        val intent = Intent(this, MediaActivity::class.java)
-        intent.putExtra("trackId", track.trackId)
-        intent.putExtra("trackName", track.trackName)
-        intent.putExtra("artistName", track.artistName)
-        intent.putExtra("trackTime", track.trackTime)
-        intent.putExtra("artworkUrl100", track.artworkUrl100)
-        intent.putExtra("collectionName", track.collectionName)
-        intent.putExtra("releaseDate", track.releaseDate)
-        intent.putExtra("primaryGenreName", track.primaryGenreName)
-        intent.putExtra("country", track.country)
-        startActivity(intent)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == MEDIA_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-
         }
     }
 
@@ -326,12 +277,7 @@ if (::refreshButton.isInitialized) {
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
 
-            historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
-                override fun onItemClick(position: Int) {
-                    val selectedTrack = searchHistoryList[position]
-                    redirectToAudioPlayer(selectedTrack)
-                }
-            })
+
 
             clearHistoryButton.setOnClickListener {
                 searchHistory.clearSearchHistory()
