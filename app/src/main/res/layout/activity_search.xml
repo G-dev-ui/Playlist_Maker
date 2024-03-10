@@ -66,14 +66,7 @@
             android:visibility="gone" />
 
     </FrameLayout>
-<ProgressBar
-    android:id="@+id/progressBar"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:indeterminateTint="@color/blue"
-    android:visibility="gone"
-    />
+
 
     <LinearLayout
         android:id="@+id/search_history"
@@ -276,6 +269,14 @@
 
         />
 
+<ProgressBar android:id="@+id/progressBar"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:indeterminateTint="@color/blue"
+    android:visibility="gone"
 
+
+    />
 </LinearLayout>
 
