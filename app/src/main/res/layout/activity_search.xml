@@ -85,7 +85,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Вы искавли"
+            android:text = "@string/you_looking"
             style="@style/TextColor"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -105,7 +105,7 @@
     style="@style/ButtomReset"
     android:textSize="16sp"
     android:layout_marginTop="24dp"
-    android:text="Очистить историю"
+    android:text="@string/clear_the_history"
     android:layout_gravity="center"
     />
 
@@ -170,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/smail"
                 android:layout_marginTop="16dp"
-                android:text="Ничего не нашлось"
+                android:text="@string/nothing_was_found"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -234,7 +234,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
-                android:text="Проблемы со связью"
+                android:text="@string/communication_problems"
                 android:textStyle="bold" />
 
             <TextView

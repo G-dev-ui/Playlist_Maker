@@ -46,8 +46,12 @@ class SearchActivity : AppCompatActivity() {
     private var currentTracks: List<Track> = emptyList()
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
+
+        if (editTextValue.isNotEmpty()) {
+            searchHistoryLayout.visibility = View.GONE
+        }
         performSearch(editTextValue)
-        searchHistoryLayout.visibility = View.GONE
+
     }
 
     private fun searchDebounce() {
@@ -126,11 +130,7 @@ class SearchActivity : AppCompatActivity() {
                 hidePlaceholders()
                 trackAdapter.updateTracks(emptyList())
 
-                if (searchHistory.getSearchHistory().isNotEmpty()) {
-                    showSearchHistory()
-                } else {
-                    searchHistoryLayout.visibility = View.GONE
-                }
+                showSearchHistory()
             }
         }
 
@@ -311,18 +311,22 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showSearchHistory() {
-        val searchHistoryList = searchHistory.getSearchHistory()
+        val searchHistoryList = searchHistory.getSearchHistory().toMutableList()
 
         if (searchHistoryList.isNotEmpty()) {
             searchHistoryLayout.visibility = View.VISIBLE
 
-            val historyAdapter = TrackAdapter(searchHistoryList.toMutableList())
+            val historyAdapter = TrackAdapter(searchHistoryList)
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
 
             historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedTrack = searchHistoryList[position]
+                    searchHistoryList.removeAt(position)
+                    searchHistoryList.add(0, selectedTrack)
+                    historyAdapter.notifyDataSetChanged()
+
                     redirectToAudioPlayer(selectedTrack)
                 }
             })
