@@ -110,8 +110,6 @@
     />
 
 
-
-
     </LinearLayout>
 
     <FrameLayout
@@ -266,6 +264,16 @@
         </LinearLayout>
 
     </FrameLayout>
+    <ProgressBar
+        android:id="@+id/progress_Bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="140dp"
+        android:indeterminateTint="@color/blue"
+        android:visibility="gone"
+        />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_track"
@@ -274,14 +282,6 @@
         android:layout_weight="1"
         android:scrollbars="vertical"
 
-        />
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/blue"
-        android:visibility="gone"
         />
 
 </LinearLayout>

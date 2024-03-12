@@ -1,5 +1,6 @@
 package com.example.playlist_maker
 
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
 
     private var itemClickListener: OnItemClickListener? = null
+    private var lastClickTime: Long = 0
 
     interface OnItemClickListener {
         fun onItemClick(position: Int)
@@ -22,8 +24,6 @@ class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapte
         notifyDataSetChanged()
     }
 
-
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.track_viwe, parent, false)
         return TrackViewHolder(view)
@@ -38,6 +38,10 @@ class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapte
         holder.bind(track)
 
         holder.itemView.setOnClickListener {
+            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
+                return@setOnClickListener
+            }
+            lastClickTime = SystemClock.elapsedRealtime()
             itemClickListener?.onItemClick(position)
         }
     }
