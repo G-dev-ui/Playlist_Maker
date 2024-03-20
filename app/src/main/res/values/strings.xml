@@ -14,4 +14,8 @@
     <string name="name_track" translatable="false">Название трека</string>
     <string name="artist_name" translatable="false">Артист</string>
     <string name="time_track" translatable="false">Время трека</string>
+    <string name="you_looking" translatable="false">Вы искали</string>
+    <string name="nothing_was_found" translatable="false">Ничего не найдено</string>
+    <string name="communication_problems" translatable="false">Проблемы со связью</string>
+    <string name="clear_the_history" translatable="false">Очистить историю</string>
 </resources>

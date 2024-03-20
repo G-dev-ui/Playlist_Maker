@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,12 +41,17 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearHistoryButton: Button
     private lateinit var searchHistoryRecyclerView: RecyclerView
     private lateinit var searchHistory: SearchHistory
+    private lateinit var progressBar: ProgressBar
     private val timeFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
     private var currentTracks: List<Track> = emptyList()
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
+
+        if (editTextValue.isNotEmpty()) {
+            searchHistoryLayout.visibility = View.GONE
+        }
         performSearch(editTextValue)
-        searchHistoryLayout.visibility = View.GONE
+
     }
 
     private fun searchDebounce() {
@@ -70,6 +76,7 @@ class SearchActivity : AppCompatActivity() {
         searchHistoryLayout = findViewById(R.id.search_history)
         clearHistoryButton = findViewById(R.id.clearing_history)
         searchHistoryRecyclerView = findViewById(R.id.track_history)
+        progressBar = findViewById(R.id.progress_Bar)
 
         hidePlaceholders()
 
@@ -123,11 +130,7 @@ class SearchActivity : AppCompatActivity() {
                 hidePlaceholders()
                 trackAdapter.updateTracks(emptyList())
 
-                if (searchHistory.getSearchHistory().isNotEmpty()) {
-                    showSearchHistory()
-                } else {
-                    searchHistoryLayout.visibility = View.GONE
-                }
+                showSearchHistory()
             }
         }
 
@@ -212,12 +215,16 @@ class SearchActivity : AppCompatActivity() {
     private fun performSearch(query: String) {
         if (query.isNotEmpty()) {
             val call = itunesApiService.search(query)
+            progressBar.visibility = View.VISIBLE
+            trackAdapter.updateTracks(emptyList())
+            hidePlaceholders()
 
             call.enqueue(object : Callback<SearchResponse> {
                 override fun onResponse(
                     call: Call<SearchResponse>,
                     response: Response<SearchResponse>
                 ) {
+                    progressBar.visibility = View.GONE
                     if (query == editTextValue) {
                         if (response.isSuccessful) {
                             val searchResponse = response.body()
@@ -228,18 +235,18 @@ class SearchActivity : AppCompatActivity() {
                                         result.trackName,
                                         result.artistName,
                                         timeFormatter.format(result.trackTimeMillis),
-                                            result.artworkUrl100,
+                                        result.artworkUrl100,
                                         result.collectionName,
                                         result.releaseDate,
                                         result.primaryGenreName,
-                                        result.country
-
-                                        )
+                                        result.country,
+                                        result.previewUrl
+                                    )
                                 }
 
                                 if (tracks.isEmpty() && query.isNotEmpty()) {
                                     showEmptyResultPlaceholder()
-                                    trackAdapter.updateTracks(emptyList())
+                                    hideTrackList()
                                 } else {
                                     hidePlaceholders()
                                     trackAdapter.updateTracks(tracks)
@@ -268,12 +275,14 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<SearchResponse>, t: Throwable) {
+                    progressBar.visibility = View.GONE
                     if (query == editTextValue) {
                         showErrorPlaceholder()
                     }
                 }
             })
         } else {
+            progressBar.visibility = View.GONE
             hidePlaceholders()
             trackAdapter.updateTracks(emptyList())
         }
@@ -290,6 +299,7 @@ class SearchActivity : AppCompatActivity() {
         intent.putExtra("releaseDate", track.releaseDate)
         intent.putExtra("primaryGenreName", track.primaryGenreName)
         intent.putExtra("country", track.country)
+        intent.putExtra("previewUrl", track.previewUrl)
         startActivity(intent)
     }
 
@@ -301,18 +311,22 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showSearchHistory() {
-        val searchHistoryList = searchHistory.getSearchHistory()
+        val searchHistoryList = searchHistory.getSearchHistory().toMutableList()
 
         if (searchHistoryList.isNotEmpty()) {
             searchHistoryLayout.visibility = View.VISIBLE
 
-            val historyAdapter = TrackAdapter(searchHistoryList.toMutableList())
+            val historyAdapter = TrackAdapter(searchHistoryList)
             searchHistoryRecyclerView.layoutManager = LinearLayoutManager(this)
             searchHistoryRecyclerView.adapter = historyAdapter
 
             historyAdapter.setOnItemClickListener(object : TrackAdapter.OnItemClickListener {
                 override fun onItemClick(position: Int) {
                     val selectedTrack = searchHistoryList[position]
+                    searchHistoryList.removeAt(position)
+                    searchHistoryList.add(0, selectedTrack)
+                    historyAdapter.notifyDataSetChanged()
+
                     redirectToAudioPlayer(selectedTrack)
                 }
             })
