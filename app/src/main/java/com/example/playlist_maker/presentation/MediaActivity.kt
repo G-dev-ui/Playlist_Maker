@@ -1,13 +1,11 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.presentation
 
-import android.media.MediaPlayer
-import android.media.metrics.PlaybackStateEvent.STATE_PAUSED
-import android.media.metrics.PlaybackStateEvent.STATE_PLAYING
-import android.net.Uri
+
+
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -15,12 +13,17 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.playlist_maker.R
+import com.example.playlist_maker.data.network.MediaInteractorImpl
+import com.example.playlist_maker.domain.api.MediaInteractor
+import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.domain.models.getCoverArtwork
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 
-
+@Suppress("DEPRECATION")
 class MediaActivity : AppCompatActivity() {
 
     companion object {
@@ -34,21 +37,24 @@ class MediaActivity : AppCompatActivity() {
 
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
-    private var mediaPlayer = MediaPlayer()
+    private lateinit var mediaInteractor: MediaInteractor
     private var handler = Handler(Looper.getMainLooper())
+
     private val updateProgressAction = object : Runnable {
         override fun run() {
-            if (mediaPlayer.isPlaying) {
-                val currentPosition = mediaPlayer.currentPosition
+            if (mediaInteractor.isPlaying()) {
+                val currentPosition = mediaInteractor.getCurrentPosition()
                 val formattedTime = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentPosition)
                 durationTextView.text = formattedTime
                 handler.postDelayed(this, 500)
             }
         }
     }
+
     private fun startUpdatingProgress() {
         handler.post(updateProgressAction)
     }
+
     private fun stopUpdatingProgress() {
         handler.removeCallbacks(updateProgressAction)
     }
@@ -62,6 +68,7 @@ class MediaActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             onBackPressed()
         }
+
         val previewUrl = intent.getStringExtra("previewUrl") ?: ""
         val trackId = intent.getLongExtra("trackId", 0)
         val trackName = intent.getStringExtra("trackName") ?: ""
@@ -79,13 +86,11 @@ class MediaActivity : AppCompatActivity() {
         }
         val primaryGenreName = intent.getStringExtra("primaryGenreName") ?: ""
         val country = intent.getStringExtra("country") ?: ""
-
         val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName, formattedReleaseDate, primaryGenreName, country, previewUrl)
 
-        preparePlayer()
+        mediaInteractor = MediaInteractorImpl()
 
-        mediaPlayer.setDataSource(track.previewUrl)
-        mediaPlayer.prepareAsync()
+        track.previewUrl?.let { preparePlayer(it) }
 
         val coverImageView = findViewById<ImageView>(R.id.album_cover)
 
@@ -107,7 +112,6 @@ class MediaActivity : AppCompatActivity() {
         val countryTextView = findViewById<TextView>(R.id.countryValue1)
         playButton = findViewById(R.id.playButton1)
 
-
         playButton.setOnClickListener {
             playbackControl()
             if (playerState == STATE_PLAYING) {
@@ -117,20 +121,19 @@ class MediaActivity : AppCompatActivity() {
             }
         }
 
-
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
         trackTimeTextView.text = track.trackTime
-        if (!collectionName.isNullOrBlank()) {
+        if (!track.collectionName.isNullOrBlank()) {
             collectionNameTextView.visibility = View.VISIBLE
-            collectionNameTextView.text = collectionName
+            collectionNameTextView.text = track.collectionName
         } else {
             collectionNameTextView.visibility = View.GONE
         }
 
         releaseDateTextView.text = track.releaseDate
-        primaryGenreNameTextView.text = primaryGenreName
-        countryTextView.text = country
+        primaryGenreNameTextView.text = track.primaryGenreName
+        countryTextView.text = track.country
     }
 
     override fun onPause() {
@@ -140,10 +143,9 @@ class MediaActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.release()
+        mediaInteractor.releaseMediaPlayer()
         stopUpdatingProgress()
     }
-
 
     private fun playbackControl() {
         when (playerState) {
@@ -166,37 +168,25 @@ class MediaActivity : AppCompatActivity() {
         playButton.setImageResource(playButtonDrawableRes)
     }
 
-    private fun preparePlayer() {
-
-
-            mediaPlayer.setOnPreparedListener {
-                playButton.isEnabled = true
-                playerState = STATE_PREPARED
-
-            mediaPlayer.setOnCompletionListener {
-                playerState = STATE_PREPARED
-                updatePlayButtonImage()
-                stopUpdatingProgress()
-                durationTextView.text = "00:00"
-            }
-        }
+    private fun preparePlayer(trackUrl: String) {
+        mediaInteractor.prepareMediaPlayer(trackUrl, {
+            playButton.isEnabled = true
+            playerState = STATE_PREPARED
+        }, {
+            playerState = STATE_PREPARED
+            updatePlayButtonImage()
+            stopUpdatingProgress()
+            durationTextView.text = "00:00"
+        })
     }
 
     private fun startPlayer() {
-        mediaPlayer.start()
+        mediaInteractor.startMediaPlayer()
         playerState = STATE_PLAYING
     }
 
     private fun pausePlayer() {
-        mediaPlayer?.let {
-            if (it.isPlaying) {
-                it.pause()
-                playerState = STATE_PAUSED
-            }
-        }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
+        mediaInteractor.pauseMediaPlayer()
+        playerState = STATE_PAUSED
     }
 }
