@@ -1,9 +1,9 @@
 package com.example.playlist_maker.data.network
 
 import android.media.MediaPlayer
-import com.example.playlist_maker.domain.api.MediaInteractor
+import com.example.playlist_maker.domain.api.MediaRepository
 
-class MediaInteractorImpl : MediaInteractor {
+class MediaRepositoryImpl : MediaRepository {
     private var mediaPlayer = MediaPlayer()
 
     override fun prepareMediaPlayer(trackUrl: String, onPrepared: () -> Unit, onCompletion: () -> Unit) {

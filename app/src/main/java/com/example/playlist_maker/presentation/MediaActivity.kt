@@ -14,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.playlist_maker.R
-import com.example.playlist_maker.data.network.MediaInteractorImpl
-import com.example.playlist_maker.domain.api.MediaInteractor
+import com.example.playlist_maker.data.network.MediaRepositoryImpl
+import com.example.playlist_maker.domain.api.MediaRepository
 import com.example.playlist_maker.domain.models.Track
 import com.example.playlist_maker.domain.models.getCoverArtwork
 import java.text.ParseException
@@ -37,7 +37,7 @@ class MediaActivity : AppCompatActivity() {
 
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
-    private lateinit var mediaInteractor: MediaInteractor
+    private lateinit var mediaInteractor: MediaRepository
     private var handler = Handler(Looper.getMainLooper())
 
     private val updateProgressAction = object : Runnable {
@@ -88,7 +88,7 @@ class MediaActivity : AppCompatActivity() {
         val country = intent.getStringExtra("country") ?: ""
         val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName, formattedReleaseDate, primaryGenreName, country, previewUrl)
 
-        mediaInteractor = MediaInteractorImpl()
+        mediaInteractor = MediaRepositoryImpl()
 
         track.previewUrl?.let { preparePlayer(it) }
 
