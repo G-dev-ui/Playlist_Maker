@@ -20,7 +20,7 @@
             android:windowSoftInputMode="stateVisible|adjustPan"
             android:exported="false" />
         <activity
-            android:name=".MediaActivity"
+            android:name=".presentation.MediaActivity"
             android:exported="false" />
         <activity
             android:name=".SettingsActivity"

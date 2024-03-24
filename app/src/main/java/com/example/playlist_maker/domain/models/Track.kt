@@ -1,4 +1,4 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.domain.models
 
 
 
