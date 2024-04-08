@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlist_maker.domain.models.Track
 
 class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
 
