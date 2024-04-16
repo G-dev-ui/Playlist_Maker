@@ -1,10 +1,11 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.search.ui
 
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.R
+import com.example.playlist_maker.player.domain.Track
 
 class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
 

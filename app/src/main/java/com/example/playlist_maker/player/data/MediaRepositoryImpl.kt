@@ -1,7 +1,7 @@
-package com.example.playlist_maker.data.network
+package com.example.playlist_maker.player.data
 
 import android.media.MediaPlayer
-import com.example.playlist_maker.domain.api.MediaRepository
+import com.example.playlist_maker.player.domain.MediaRepository
 
 class MediaRepositoryImpl : MediaRepository {
     private var mediaPlayer = MediaPlayer()

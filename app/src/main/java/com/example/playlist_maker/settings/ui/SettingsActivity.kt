@@ -1,13 +1,13 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.settings.ui
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
+import com.example.playlist_maker.App
+import com.example.playlist_maker.R
 
 class SettingsActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.example.playlist_maker.domain.api
+package com.example.playlist_maker.player.domain
 
 interface MediaRepository {
     fun prepareMediaPlayer(trackUrl: String, onPrepared: () -> Unit, onCompletion: () -> Unit)

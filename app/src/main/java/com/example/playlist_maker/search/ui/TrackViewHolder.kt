@@ -1,4 +1,4 @@
-package com.example.playlist_maker
+package com.example.playlist_maker.search.ui
 
 import android.content.Context
 import android.util.TypedValue
@@ -8,7 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.example.playlist_maker.domain.models.Track
+import com.example.playlist_maker.R
+import com.example.playlist_maker.player.domain.Track
 
 
 class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -20,7 +21,7 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(model: Track) {
         trackNameView.text = model.trackName
         artistNameView.text = model.artistName
-        trackTimeView.text = model.trackTime
+        trackTimeView.text = model.trackTimeMillis
 
         Glide.with(itemView)
             .load(model.artworkUrl100)

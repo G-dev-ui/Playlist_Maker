@@ -1,4 +1,4 @@
-package com.example.playlist_maker.presentation
+package com.example.playlist_maker.player.ui
 
 
 
@@ -14,10 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.playlist_maker.R
-import com.example.playlist_maker.data.network.MediaRepositoryImpl
-import com.example.playlist_maker.domain.api.MediaRepository
-import com.example.playlist_maker.domain.models.Track
-import com.example.playlist_maker.domain.models.getCoverArtwork
+import com.example.playlist_maker.player.data.MediaRepositoryImpl
+import com.example.playlist_maker.player.domain.MediaRepository
+import com.example.playlist_maker.player.domain.Track
+import com.example.playlist_maker.player.domain.getCoverArtwork
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -123,7 +123,7 @@ class MediaActivity : AppCompatActivity() {
 
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
-        trackTimeTextView.text = track.trackTime
+        trackTimeTextView.text = track.trackTimeMillis
         if (!track.collectionName.isNullOrBlank()) {
             collectionNameTextView.visibility = View.VISIBLE
             collectionNameTextView.text = track.collectionName
