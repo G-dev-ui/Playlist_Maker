@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name="com.example.playlist_maker.App"
@@ -17,18 +17,26 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
+            android:name=".music_library.ui.Music_Library"
+            android:exported="false"
+            android:label="@string/title_activity_music_library"
+             />
+        <activity
             android:name=".search.ui.SearchActivity"
-            android:windowSoftInputMode="stateVisible|adjustPan"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="stateVisible|adjustPan" />
         <activity
             android:name=".player.ui.MediaActivity"
-            android:exported="false" />
+            android:exported="false"
+            />
+
         <activity
             android:name=".settings.ui.SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".main.ui.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

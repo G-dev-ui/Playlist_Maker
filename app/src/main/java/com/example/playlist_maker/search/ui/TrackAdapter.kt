@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
 import com.example.playlist_maker.player.domain.Track
 
-class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter(var tracks: MutableList<Track>, private val onItemClick: (Track) -> Unit) : RecyclerView.Adapter<TrackViewHolder>() {
 
     private var itemClickListener: OnItemClickListener? = null
     private var lastClickTime: Long = 0
@@ -44,7 +44,7 @@ class TrackAdapter(private var tracks: MutableList<Track>) : RecyclerView.Adapte
                 return@setOnClickListener
             }
             lastClickTime = SystemClock.elapsedRealtime()
-            itemClickListener?.onItemClick(position)
+            onItemClick(track)
         }
     }
 }

@@ -1,9 +1,12 @@
-package com.example.playlist_maker.search.data
+package com.example.playlist_maker.search.data.repository
 
 
 import com.example.playlist_maker.creator.Resource
 import com.example.playlist_maker.player.domain.Track
-import com.example.playlist_maker.search.domain.TracksRepository
+import com.example.playlist_maker.search.data.dto.TracksSearchRequest
+import com.example.playlist_maker.search.data.dto.TracksSearchResponse
+import com.example.playlist_maker.search.data.network.NetworkClient
+import com.example.playlist_maker.search.domain.api.TracksRepository
 
 class TracksRepositoryImpl(private val networkClient: NetworkClient) : TracksRepository {
     override fun searchTracks(text: String): Resource<List<Track>> {

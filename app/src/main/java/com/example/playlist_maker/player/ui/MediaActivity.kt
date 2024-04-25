@@ -3,19 +3,18 @@ package com.example.playlist_maker.player.ui
 
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.playlist_maker.R
-import com.example.playlist_maker.player.data.MediaRepositoryImpl
-import com.example.playlist_maker.player.domain.MediaRepository
+import com.example.playlist_maker.player.domain.MediaPlayerState
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.domain.getCoverArtwork
 import java.text.ParseException
@@ -23,51 +22,32 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 
-@Suppress("DEPRECATION")
+
 class MediaActivity : AppCompatActivity() {
 
-    companion object {
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-    }
-
-    private var playerState = STATE_DEFAULT
 
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
-    private lateinit var mediaInteractor: MediaRepository
-    private var handler = Handler(Looper.getMainLooper())
+    private lateinit var mediaViewModel : MediaPlayerViewModel
 
-    private val updateProgressAction = object : Runnable {
-        override fun run() {
-            if (mediaInteractor.isPlaying()) {
-                val currentPosition = mediaInteractor.getCurrentPosition()
-                val formattedTime = SimpleDateFormat("mm:ss", Locale.getDefault()).format(currentPosition)
-                durationTextView.text = formattedTime
-                handler.postDelayed(this, 500)
-            }
-        }
-    }
 
-    private fun startUpdatingProgress() {
-        handler.post(updateProgressAction)
-    }
 
-    private fun stopUpdatingProgress() {
-        handler.removeCallbacks(updateProgressAction)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media)
 
+        mediaViewModel = ViewModelProvider(this, MediaPlayerViewModel.getViewModelFactory())[MediaPlayerViewModel::class.java]
+        mediaViewModel.observeState().observe(this) { render(it) }
+
         durationTextView = findViewById(R.id.durationTextView1)
+
+
         val backButton = findViewById<ImageButton>(R.id.back_button_playerActivity1)
         backButton.setOnClickListener {
-            onBackPressed()
+          onBackPressed()
         }
+
 
         val previewUrl = intent.getStringExtra("previewUrl") ?: ""
         val trackId = intent.getLongExtra("trackId", 0)
@@ -87,10 +67,6 @@ class MediaActivity : AppCompatActivity() {
         val primaryGenreName = intent.getStringExtra("primaryGenreName") ?: ""
         val country = intent.getStringExtra("country") ?: ""
         val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName, formattedReleaseDate, primaryGenreName, country, previewUrl)
-
-        mediaInteractor = MediaRepositoryImpl()
-
-        track.previewUrl?.let { preparePlayer(it) }
 
         val coverImageView = findViewById<ImageView>(R.id.album_cover)
 
@@ -112,13 +88,11 @@ class MediaActivity : AppCompatActivity() {
         val countryTextView = findViewById<TextView>(R.id.countryValue1)
         playButton = findViewById(R.id.playButton1)
 
+        track.previewUrl?.let { mediaViewModel.preparePlayer(it) }!!
+
         playButton.setOnClickListener {
-            playbackControl()
-            if (playerState == STATE_PLAYING) {
-                startUpdatingProgress()
-            } else {
-                stopUpdatingProgress()
-            }
+            Log.d("MediaActivity", "Play button clicked")
+           mediaViewModel.playbackControl()
         }
 
         trackNameTextView.text = track.trackName
@@ -138,55 +112,49 @@ class MediaActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        pausePlayer()
+        playButton.setImageResource(R.drawable.play_buttom)
+        mediaViewModel.releaseMediaPlayer()
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaInteractor.releaseMediaPlayer()
-        stopUpdatingProgress()
+       mediaViewModel.releaseMediaPlayer()
+
     }
 
-    private fun playbackControl() {
-        when (playerState) {
-            STATE_PLAYING -> {
-                pausePlayer()
-            }
-            STATE_PREPARED, STATE_PAUSED -> {
-                startPlayer()
-            }
+
+    private fun render (state:PlayerState){
+        when (state){
+            is PlayerState.ChangePosition -> TrackPositionChanged(state.position)
+            is PlayerState.Prepared -> PreparedPlayer()
+            is PlayerState.Playing -> PlayerStart()
+            is PlayerState.Pause -> PlayerPaused()
+            is PlayerState.Complete -> TrackComplete()
         }
-        updatePlayButtonImage()
     }
 
-    private fun updatePlayButtonImage() {
-        val playButtonDrawableRes = when (playerState) {
-            STATE_PLAYING -> R.drawable.paus_buttom
-            STATE_PREPARED, STATE_PAUSED -> R.drawable.play_buttom
-            else -> R.drawable.play_buttom
-        }
-        playButton.setImageResource(playButtonDrawableRes)
+
+    private fun PlayerStart (){
+        playButton.setImageResource(R.drawable.play_buttom)
     }
 
-    private fun preparePlayer(trackUrl: String) {
-        mediaInteractor.prepareMediaPlayer(trackUrl, {
-            playButton.isEnabled = true
-            playerState = STATE_PREPARED
-        }, {
-            playerState = STATE_PREPARED
-            updatePlayButtonImage()
-            stopUpdatingProgress()
-            durationTextView.text = "00:00"
-        })
+    private fun PlayerPaused(){
+        playButton.setImageResource(R.drawable.paus_buttom)
     }
 
-    private fun startPlayer() {
-        mediaInteractor.startMediaPlayer()
-        playerState = STATE_PLAYING
+    private fun TrackPositionChanged(position: String){
+        durationTextView.text = position
     }
 
-    private fun pausePlayer() {
-        mediaInteractor.pauseMediaPlayer()
-        playerState = STATE_PAUSED
+    private fun PreparedPlayer(){
+        playButton.isClickable = true
     }
+
+   private fun TrackComplete(){
+      MediaPlayerState.PREPARED
+       playButton.setImageResource(R.drawable.play_buttom)
+       durationTextView.setText(R.string.durationSample)
+   }
+
 }

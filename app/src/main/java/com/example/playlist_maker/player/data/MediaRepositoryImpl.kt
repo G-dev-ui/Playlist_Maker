@@ -29,7 +29,7 @@ class MediaRepositoryImpl : MediaRepository {
     }
 
     override fun releaseMediaPlayer() {
-        mediaPlayer.release()
+        mediaPlayer.reset()
     }
     override fun isPlaying(): Boolean {
         return mediaPlayer.isPlaying
