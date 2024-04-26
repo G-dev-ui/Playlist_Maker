@@ -29,15 +29,14 @@
 
 
         <Button
-            style="@style/ButtonStyle"
             android:id="@+id/Search"
+            style="@style/ButtonStyle"
             android:text="@string/search_titel"
-            app:icon="@drawable/search"
-             />
+            app:icon="@drawable/search" />
 
         <Button
             style="@style/ButtonStyle"
-            android:id="@+id/Media"
+            android:id="@+id/music_library"
             android:text="@string/media_titel"
             app:icon="@drawable/media"
              />

@@ -67,8 +67,7 @@
     <style name="TextTrackinPlayer">
         <item name="android:textColor">@color/black</item>
         <item name="fontFamily">@font/ys_display_medium</item>
-
-
     </style>
+
 
 </resources>

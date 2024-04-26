@@ -18,4 +18,9 @@
     <string name="nothing_was_found" translatable="false">Ничего не найдено</string>
     <string name="communication_problems" translatable="false">Проблемы со связью</string>
     <string name="clear_the_history" translatable="false">Очистить историю</string>
+    <string name="nothing_found" translatable="false">Ничего не нашлось</string>
+    <string name="something_went_wrong" translatable="false">Что-то не так</string>
+    <string name="durationSample" translatable="false">00:30</string>
+    <string name="title_activity_music_library">Music_Library</string>
+    <string name="email_recipient" translatable="false">kronker61@yandex.ru</string>
 </resources>
