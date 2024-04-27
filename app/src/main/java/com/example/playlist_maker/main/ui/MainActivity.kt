@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.example.playlist_maker.music_library.ui.Music_Library
+import com.example.playlist_maker.music_library.ui.MusicLibrary
 import com.example.playlist_maker.R
 import com.example.playlist_maker.search.ui.SearchActivity
 import com.example.playlist_maker.settings.ui.SettingsActivity
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         val buttonMedia = findViewById<Button>(R.id.music_library)
         buttonMedia.setOnClickListener {
-            val intent = Intent(this, Music_Library::class.java)
+            val intent = Intent(this, MusicLibrary::class.java)
             startActivity(intent)
         }
 

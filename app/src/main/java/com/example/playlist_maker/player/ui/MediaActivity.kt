@@ -17,6 +17,7 @@ import com.example.playlist_maker.R
 import com.example.playlist_maker.player.domain.MediaPlayerState
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.domain.getCoverArtwork
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -28,16 +29,16 @@ class MediaActivity : AppCompatActivity() {
 
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
-    private lateinit var mediaViewModel : MediaPlayerViewModel
 
 
 
+    private val mediaViewModel by viewModel<MediaPlayerViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media)
 
-        mediaViewModel = ViewModelProvider(this, MediaPlayerViewModel.getViewModelFactory())[MediaPlayerViewModel::class.java]
+
         mediaViewModel.observeState().observe(this) { render(it) }
 
         durationTextView = findViewById(R.id.durationTextView1)

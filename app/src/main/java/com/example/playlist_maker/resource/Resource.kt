@@ -1,4 +1,4 @@
-package com.example.playlist_maker.creator
+package com.example.playlist_maker.resource
 
 sealed class Resource<T>(val data: T? = null, val message: String? = null) {
     class Success<T>(data: T): Resource<T>(data)

@@ -1,20 +1,13 @@
 package com.example.playlist_maker.search.ui
 
-import android.app.Application
+
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.playlist_maker.R
-import com.example.playlist_maker.creator.Creator
+import androidx.lifecycle.ViewModel
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.search.data.repository.SearchHistoryRepositoryImpl
 import com.example.playlist_maker.search.domain.repository.SearchHistoryRepository
@@ -22,24 +15,16 @@ import com.example.playlist_maker.search.domain.TracksInteractor
 
 
 
-class TracksSearchViewModel (application: Application): AndroidViewModel(application) {
+class TracksSearchViewModel (private val tracksInteractor : TracksInteractor, private val searchHistoryRepository : SearchHistoryRepository ): ViewModel() {
 
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
 
-        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                TracksSearchViewModel(this[APPLICATION_KEY] as Application)
-            }
-        }
     }
 
-    private val searchHistoryRepository: SearchHistoryRepository = SearchHistoryRepositoryImpl(
-        application.getSharedPreferences("SearchHistory", Context.MODE_PRIVATE)
-    )
-    private val tracksInteractor = Creator.provideTracksInteractor(getApplication())
+
     private val handler = Handler(Looper.getMainLooper())
     private var historyTrackList: List<Track> = searchHistoryRepository.getSearchHistory()
 
@@ -82,7 +67,7 @@ class TracksSearchViewModel (application: Application): AndroidViewModel(applica
                             errorMessage != null -> {
                                 renderState(
                                     TracksState.ConnectionError(
-                                       errorMessage = getApplication<Application>().getString(R.string.something_went_wrong),
+                                       errorMessage = errorMessage
                                     )
                                 )
 
@@ -91,7 +76,7 @@ class TracksSearchViewModel (application: Application): AndroidViewModel(applica
                             tracks.isEmpty() -> {
                                 renderState(
                                     TracksState.NothingFound(
-                                        message = getApplication<Application>().getString(R.string.nothing_found),
+                                       message = String()
                                     )
                                 )
 

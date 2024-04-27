@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.example.playlist_maker.App"
+        android:name="com.example.playlist_maker.App.App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,7 +17,7 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".music_library.ui.Music_Library"
+            android:name=".music_library.ui.MusicLibrary"
             android:exported="false"
             android:label="@string/title_activity_music_library"
              />

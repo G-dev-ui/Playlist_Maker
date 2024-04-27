@@ -4,31 +4,30 @@ import android.app.Application
 import android.icu.text.SimpleDateFormat
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.playlist_maker.creator.Creator
+
 import com.example.playlist_maker.player.domain.MediaPlayerState
+import com.example.playlist_maker.player.domain.MediaRepository
 import java.util.Locale
 
-class MediaPlayerViewModel(application: Application) : AndroidViewModel(application) {
+class MediaPlayerViewModel(private val mediaPlayerRepository : MediaRepository) : ViewModel() {
     companion object {
         private const val UPDATE_POSITION_DELAY = 250L
-        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer { MediaPlayerViewModel(this[APPLICATION_KEY] as Application) }
-        }
+
     }
 
     private var playerState = MediaPlayerState.PREPARED
     private val stateLiveData = MutableLiveData<PlayerState>()
     fun observeState(): LiveData<PlayerState> = stateLiveData
 
-    private val mediaPlayerRepository = Creator.provideMediaPlayerRepository()
+   // private val mediaPlayerRepository = Creator.provideMediaPlayerRepository()
     private val handler = Handler(Looper.getMainLooper())
 
     private val updateProgressAction = object : Runnable{
