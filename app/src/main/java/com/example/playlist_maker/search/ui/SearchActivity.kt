@@ -24,13 +24,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.ui.MediaActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchBar: EditText
     private lateinit var textWatcher: TextWatcher
-    private lateinit var viewModel: TracksSearchViewModel
     private lateinit var emptyResultPlaceholder: View
     private lateinit var errorPlaceholder: View
     private lateinit var refreshButton: Button
@@ -48,6 +48,8 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 2000L
     }
+
+    private val viewModel by viewModel<TracksSearchViewModel>()
 
    private val historyadapter = TrackAdapter(mutableListOf()){track ->
        if (clickDebounce()){
@@ -91,7 +93,7 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        viewModel = ViewModelProvider(this, TracksSearchViewModel.getViewModelFactory())[TracksSearchViewModel::class.java]
+
         viewModel.observeState().observe(this) {
             render(it)
         }

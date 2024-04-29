@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import com.example.playlist_maker.settings.domain.ThemeSettings
 
 
-const val NIGHT_THEME_KEY = "night_theme"
+ private const val NIGHT_THEME_KEY = "night_theme"
 class SettingsRepositoryImpl(private val sharedPrefs: SharedPreferences): SettingsRepository {
 
     override fun getThemeSettings(): ThemeSettings {
@@ -16,5 +16,6 @@ class SettingsRepositoryImpl(private val sharedPrefs: SharedPreferences): Settin
             .putBoolean(NIGHT_THEME_KEY, settings.darkTheme)
             .apply()
     }
+
 
 }
