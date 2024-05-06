@@ -238,10 +238,5 @@ class SearchFragment : Fragment() {
             View.VISIBLE
         }
     }
-    override fun onPause() {
-        super.onPause()
-        if (searchBar.text.isNotEmpty()) {
-            searchBar.setText("")
-        }
-    }
+
 }
