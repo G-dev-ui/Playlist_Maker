@@ -21,7 +21,5 @@ sealed interface TracksState {
         val searchHistory: List<Track>
         ) : TracksState
 
-    data class ClearedSearchBar (
-        val text: String
-            ): TracksState
+
 }

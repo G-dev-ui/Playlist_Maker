@@ -96,9 +96,7 @@ class TracksSearchViewModel (private val tracksInteractor : TracksInteractor, pr
         }
     }
 
-    fun showHideResetButton(text: String){
-        renderState(TracksState.ClearedSearchBar(text))
-    }
+
     fun ClearHistory(){
         searchHistoryRepository.clearSearchHistory()
         renderState(TracksState.Empty)

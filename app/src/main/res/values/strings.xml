@@ -28,5 +28,11 @@
     <string name="empty_medialists" translatable="false">Вы не создали ни одного плейлиста</string>
     <string name="selected_tracks" translatable="false">Избранные треки</string>
     <string name="playlists" translatable="false">Плейлисты</string>
-    
+    <string name="new_playlists" translatable="false">Новый плейлист</string>
+    <string name="search" translatable="false">Поиск</string>
+    <string name="media_library" translatable="false">Медиатека</string>
+    <string name="settings" translatable="false">Настройки</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+
 </resources>

@@ -74,4 +74,13 @@
         <item name="textAllCaps">false</item>
     </style>
 
+    <style name="bottomViewStyle">
+        <item name="android:background">@color/black</item>
+    </style>
+
+    <style name="BottomNavMenu">
+        <item name="backgroundTint">@color/white</item>
+        <item name="itemIconTint">@animator/tab_color_day</item>
+        <item name="itemTextColor">@animator/tab_color_day</item>
+    </style>
 </resources>
