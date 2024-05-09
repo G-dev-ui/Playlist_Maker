@@ -14,8 +14,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class SettingsFragment : Fragment() {
 
 
-     private lateinit var binding: FragmentSettingsBinding
+     private  var _binding: FragmentSettingsBinding? = null
     private lateinit var themeSwitcher: SwitchMaterial
+
+    private val binding get() = _binding!!
 
      private val settingsViewModel by viewModel<SettingsViewModel>()
 
@@ -24,7 +26,7 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -56,5 +58,8 @@ class SettingsFragment : Fragment() {
         }
     }
 
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

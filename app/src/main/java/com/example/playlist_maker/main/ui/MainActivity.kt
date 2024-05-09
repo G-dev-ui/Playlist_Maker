@@ -14,6 +14,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -23,14 +24,12 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.rootFragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController
 
-
         binding.bottomNavigationView.setupWithNavController(navController)
-
 
         showNavBar()
     }
 
-    fun showNavBar() {
+    private  fun showNavBar() {
         val navBar = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         navBar.visibility = View.VISIBLE
     }

@@ -34,8 +34,15 @@
         style="@style/TextColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/empty_medialists"
+        android:text="@string/empty_medialists1"
         android:layout_gravity="center"
         android:textStyle="bold"/>
+        <TextView
+            style="@style/TextColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_medialists2"
+            android:layout_gravity="center"
+            android:textStyle="bold"/>
 </LinearLayout>
 </LinearLayout>

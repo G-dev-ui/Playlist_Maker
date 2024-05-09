@@ -13,15 +13,17 @@ import com.google.android.material.tabs.TabLayoutMediator
 class MusicLibraryFragment : Fragment() {
 
 
-    private  var binding: FragmentMusicLibraryBinding? = null
+    private  var _binding: FragmentMusicLibraryBinding? = null
     private  var tabMediator: TabLayoutMediator? = null
+
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentMusicLibraryBinding.inflate(inflater, container, false)
+        _binding = FragmentMusicLibraryBinding.inflate(inflater, container, false)
         return binding!!.root
     }
 
@@ -46,5 +48,6 @@ class MusicLibraryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         tabMediator?.detach()
+        _binding = null
     }
 }
