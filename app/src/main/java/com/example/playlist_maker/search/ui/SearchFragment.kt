@@ -135,8 +135,8 @@ class SearchFragment : Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val searchText = s?.toString() ?: ""
+                binding.resetButton.visibility = clearButtonVisibility(s)
                 if (searchText != viewModel.lastSearchText) {
-                    binding.resetButton.visibility = clearButtonVisibility(s)
                     viewModel.searchDebounce(changedText = searchText)
                 }
             }
