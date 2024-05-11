@@ -33,7 +33,7 @@ class TracksSearchViewModel(
     private val stateLiveData = MutableLiveData<TracksState>()
     fun observeState(): LiveData<TracksState> = stateLiveData
 
-    private var lastSearchText: String? = null
+    var lastSearchText: String? = null
 
 
     override fun onCleared() {
@@ -53,52 +53,56 @@ class TracksSearchViewModel(
         )
     }
 
+
     private fun performSearch(newSearchText: String) {
 
-        if (newSearchText.isNotEmpty()) {
-            renderState(TracksState.Loading)
+            if (newSearchText.isNotEmpty()) {
+                renderState(TracksState.Loading)
 
-            tracksInteractor.searchTracks(newSearchText, object : TracksInteractor.TracksConsumer {
-                override fun consume(foundTracks: List<Track>?, errorMessage: String?) {
-                    val tracks = mutableListOf<Track>()
 
-                    if (foundTracks != null) {
-                        tracks.addAll(foundTracks)
-                    }
+                tracksInteractor.searchTracks(
+                    newSearchText,
+                    object : TracksInteractor.TracksConsumer {
+                        override fun consume(foundTracks: List<Track>?, errorMessage: String?) {
+                            val tracks = mutableListOf<Track>()
 
-                    when {
-                        errorMessage != null -> {
-                            renderState(
-                                TracksState.ConnectionError(
-                                    errorMessage = errorMessage
-                                )
-                            )
+                            if (foundTracks != null) {
+                                tracks.addAll(foundTracks)
+                            }
+
+                            when {
+                                errorMessage != null -> {
+                                    renderState(
+                                        TracksState.ConnectionError(
+                                            errorMessage = errorMessage
+                                        )
+                                    )
+
+                                }
+
+                                tracks.isEmpty() -> {
+                                    renderState(
+                                        TracksState.NothingFound(
+                                            message = String()
+                                        )
+                                    )
+
+                                }
+
+                                else -> {
+
+                                    renderState(
+                                        TracksState.Content(
+                                            tracks = tracks
+                                        )
+                                    )
+
+                                }
+                            }
 
                         }
-
-                        tracks.isEmpty() -> {
-                            renderState(
-                                TracksState.NothingFound(
-                                    message = String()
-                                )
-                            )
-
-                        }
-
-                        else -> {
-
-                            renderState(
-                                TracksState.Content(
-                                    tracks = tracks
-                                )
-                            )
-
-                        }
-                    }
-
-                }
-            })
-        }
+                    })
+            }
 
     }
 
@@ -133,4 +137,5 @@ class TracksSearchViewModel(
     private fun renderState(state: TracksState) {
         stateLiveData.postValue(state)
     }
+
 }
