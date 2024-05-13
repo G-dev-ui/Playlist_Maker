@@ -1,36 +1,36 @@
 package com.example.playlist_maker.main.ui
 
-import android.content.Intent
+
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.example.playlist_maker.music_library.ui.MusicLibrary
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+
 import com.example.playlist_maker.R
-import com.example.playlist_maker.search.ui.SearchActivity
-import com.example.playlist_maker.settings.ui.SettingsActivity
+import com.example.playlist_maker.databinding.ActivityMainBinding
+
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val buttonSearch = findViewById<Button>(R.id.Search)
-        buttonSearch.setOnClickListener {
-            val intent = Intent(this, SearchActivity::class.java)
-            startActivity(intent)
-        }
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val buttonMedia = findViewById<Button>(R.id.music_library)
-        buttonMedia.setOnClickListener {
-            val intent = Intent(this, MusicLibrary::class.java)
-            startActivity(intent)
-        }
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.rootFragmentContainerView) as NavHostFragment
+        val navController = navHostFragment.navController
 
+        binding.bottomNavigationView.setupWithNavController(navController)
 
-        val buttonSettings = findViewById<Button>(R.id.Settings)
-        buttonSettings.setOnClickListener {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
-        }
+        showNavBar()
+    }
+
+    private  fun showNavBar() {
+        val navBar = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        navBar.visibility = View.VISIBLE
     }
 }

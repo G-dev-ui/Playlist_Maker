@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".music_library.ui.MusicLibrary"
-    android:orientation="vertical">
+    tools:context=".music_library.ui.MusicLibraryFragment"
+    android:orientation="vertical"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,13 +14,6 @@
         android:orientation="horizontal"
         android:padding="4dp">
 
-        <ImageView
-
-            style="@style/ImageSettingsStyle"
-            android:id="@+id/image"
-            android:padding="12dp"
-            android:src="@drawable/back_ic"
-            />
         <TextView
             style="@style/TextSettingsStyle"
             android:padding="12dp"
@@ -29,14 +23,14 @@
 
     </LinearLayout>
 
-   <com.google.android.material.tabs.TabLayout
-       android:id="@+id/tabLayout"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       style="@style/tabStyle"
-       app:tabMode="fixed"
-       app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
-       />
+     <com.google.android.material.tabs.TabLayout
+    android:id="@+id/tabLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style= "@style/tabStyle"
+    app:tabMode="fixed"
+         app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
+    />
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"

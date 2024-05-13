@@ -25,8 +25,14 @@
     <string name="email_recipient" translatable="false">kronker61@yandex.ru</string>
     <string name="music_library" translatable="false">Медиатека</string>
     <string name="media_library_empty" translatable="false">Ваша медиатека пуста</string>
-    <string name="empty_medialists" translatable="false">Вы не создали ни одного плейлиста</string>
+    <string name="empty_medialists1" translatable="false">Вы не создали</string>
+    <string name="empty_medialists2" translatable="false">ни одного плейлиста</string>
     <string name="selected_tracks" translatable="false">Избранные треки</string>
     <string name="playlists" translatable="false">Плейлисты</string>
-    
+    <string name="new_playlists" translatable="false">Новый плейлист</string>
+    <string name="search" translatable="false">Поиск</string>
+    <string name="media_library" translatable="false">Медиатека</string>
+    <string name="settings" translatable="false">Настройки</string>
+
+
 </resources>

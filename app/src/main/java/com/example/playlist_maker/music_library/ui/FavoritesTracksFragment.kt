@@ -26,4 +26,9 @@ class FavoritesTracksFragment : Fragment() {
         _binding = FragmentFavoritesTracksBinding.inflate(inflater, container, false)
         return binding.root
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
