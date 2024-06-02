@@ -1,6 +1,6 @@
 package com.example.playlist_maker.App
 
-import android.annotation.SuppressLint
+
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.playlist_maker.di.dataModel
@@ -10,7 +10,6 @@ import com.example.playlist_maker.di.viewModelModule
 import com.example.playlist_maker.settings.domain.SettingsInteractor
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
 
 class App : Application() {

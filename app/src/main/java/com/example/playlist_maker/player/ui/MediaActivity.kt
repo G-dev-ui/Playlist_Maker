@@ -3,18 +3,16 @@ package com.example.playlist_maker.player.ui
 
 
 import android.os.Bundle
-import android.util.Log
+
 
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.playlist_maker.R
-import com.example.playlist_maker.player.domain.MediaPlayerState
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.domain.getCoverArtwork
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -26,11 +24,8 @@ import java.util.Locale
 
 class MediaActivity : AppCompatActivity() {
 
-
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
-
-
 
     private val mediaViewModel by viewModel<MediaPlayerViewModel>()
 
@@ -38,17 +33,15 @@ class MediaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media)
 
+        playButton = findViewById(R.id.playButton1)
+        durationTextView = findViewById(R.id.durationTextView1)
 
         mediaViewModel.observeState().observe(this) { render(it) }
 
-        durationTextView = findViewById(R.id.durationTextView1)
-
-
         val backButton = findViewById<ImageButton>(R.id.back_button_playerActivity1)
         backButton.setOnClickListener {
-          onBackPressed()
+            onBackPressed()
         }
-
 
         val previewUrl = intent.getStringExtra("previewUrl") ?: ""
         val trackId = intent.getLongExtra("trackId", 0)
@@ -87,14 +80,6 @@ class MediaActivity : AppCompatActivity() {
         val releaseDateTextView = findViewById<TextView>(R.id.yearValue1)
         val primaryGenreNameTextView = findViewById<TextView>(R.id.genreValue1)
         val countryTextView = findViewById<TextView>(R.id.countryValue1)
-        playButton = findViewById(R.id.playButton1)
-
-        track.previewUrl?.let { mediaViewModel.preparePlayer(it) }!!
-
-        playButton.setOnClickListener {
-            Log.d("MediaActivity", "Play button clicked")
-           mediaViewModel.playbackControl()
-        }
 
         trackNameTextView.text = track.trackName
         artistNameTextView.text = track.artistName
@@ -109,6 +94,14 @@ class MediaActivity : AppCompatActivity() {
         releaseDateTextView.text = track.releaseDate
         primaryGenreNameTextView.text = track.primaryGenreName
         countryTextView.text = track.country
+
+        if (previewUrl.isNotEmpty()) {
+            mediaViewModel.preparePlayer(previewUrl)
+        }
+
+        playButton.setOnClickListener {
+            mediaViewModel.playbackControl()
+        }
     }
 
     override fun onPause() {
@@ -117,16 +110,13 @@ class MediaActivity : AppCompatActivity() {
         mediaViewModel.releaseMediaPlayer()
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
-       mediaViewModel.releaseMediaPlayer()
-
+        mediaViewModel.releaseMediaPlayer()
     }
 
-
-    private fun render (state:PlayerState){
-        when (state){
+    private fun render(state: PlayerState) {
+        when (state) {
             is PlayerState.ChangePosition -> TrackPositionChanged(state.position)
             is PlayerState.Prepared -> PreparedPlayer()
             is PlayerState.Playing -> PlayerStart()
@@ -135,27 +125,25 @@ class MediaActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun PlayerStart (){
-        playButton.setImageResource(R.drawable.play_buttom)
-    }
-
-    private fun PlayerPaused(){
+    private fun PlayerStart() {
         playButton.setImageResource(R.drawable.paus_buttom)
     }
 
-    private fun TrackPositionChanged(position: String){
+    private fun PlayerPaused() {
+        playButton.setImageResource(R.drawable.play_buttom)
+    }
+
+    private fun TrackPositionChanged(position: String) {
         durationTextView.text = position
     }
 
-    private fun PreparedPlayer(){
+    private fun PreparedPlayer() {
         playButton.isClickable = true
+        playButton.setImageResource(R.drawable.play_buttom)
     }
 
-   private fun TrackComplete(){
-      MediaPlayerState.PREPARED
-       playButton.setImageResource(R.drawable.play_buttom)
-       durationTextView.setText(R.string.durationSample)
-   }
-
+    private fun TrackComplete() {
+        playButton.setImageResource(R.drawable.play_buttom)
+        durationTextView.setText(R.string.durationSample2)
+    }
 }
