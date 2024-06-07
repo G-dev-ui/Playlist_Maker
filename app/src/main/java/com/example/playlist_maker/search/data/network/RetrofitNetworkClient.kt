@@ -5,26 +5,27 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.example.playlist_maker.search.data.dto.Response
 import com.example.playlist_maker.search.data.dto.TracksSearchRequest
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 class RetrofitNetworkClient(private val context: Context, private val itunesApiService: ItunesApiService) : NetworkClient {
 
 
-    override fun doRequest(dto: Any): Response {
-        if (isConnected() == false) {
+    override suspend fun doRequest(dto: Any): Response {
+        if (!isConnected()) {
             return Response().apply { resultCode = -1 }
         }
         if (dto !is TracksSearchRequest) {
             return Response().apply { resultCode = 400 }
         }
-
-        val response = itunesApiService.search(dto.text).execute()
-        val body = response.body()
-        return if (body != null) {
-            body.apply { resultCode = response.code() }
-        } else {
-            Response().apply { resultCode = response.code() }
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = itunesApiService.search(dto.text)
+                response.apply { resultCode = 200 }
+            } catch (e: Throwable) {
+                Response().apply { resultCode = 505 }
+            }
         }
     }
     private fun isConnected(): Boolean {

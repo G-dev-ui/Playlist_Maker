@@ -1,87 +1,98 @@
 package com.example.playlist_maker.player.ui
 
-import android.app.Application
+
 import android.icu.text.SimpleDateFormat
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.lifecycle.viewModelScope
+
 
 import com.example.playlist_maker.player.domain.MediaPlayerState
 import com.example.playlist_maker.player.domain.MediaRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-class MediaPlayerViewModel(private val mediaPlayerRepository : MediaRepository) : ViewModel() {
+class MediaPlayerViewModel(private val mediaPlayerRepository: MediaRepository) : ViewModel() {
     companion object {
-        private const val UPDATE_POSITION_DELAY = 250L
-
+        private const val UPDATE_POSITION_DELAY = 300L
     }
 
     private var playerState = MediaPlayerState.PREPARED
     private val stateLiveData = MutableLiveData<PlayerState>()
     fun observeState(): LiveData<PlayerState> = stateLiveData
 
-   // private val mediaPlayerRepository = Creator.provideMediaPlayerRepository()
-    private val handler = Handler(Looper.getMainLooper())
-
-    private val updateProgressAction = object : Runnable{
-        override fun run() {
-           if (mediaPlayerRepository.isPlaying()){
-               updateTrackTimer()
-               handler.postDelayed(this, UPDATE_POSITION_DELAY)
-           }
-        }
-    }
+    private var updateJob: Job? = null
 
     fun playbackControl() {
-        this.playerState = when (playerState) {
+        when (playerState) {
             MediaPlayerState.PLAYING -> {
+                Log.d("MediaPlayer", "Pausing media player")
                 mediaPlayerRepository.pauseMediaPlayer()
-                renderState(PlayerState.Playing)
-                updateProgressAction.let { handler.removeCallbacks(it) }
-                MediaPlayerState.PAUSED
-            }
-            MediaPlayerState.PREPARED , MediaPlayerState.PAUSED -> {
-                mediaPlayerRepository.startMediaPlayer()
+                stopUpdatingTrackPosition()
+                playerState = MediaPlayerState.PAUSED
                 renderState(PlayerState.Pause)
-                updateProgressAction.let { handler.post(it) }
-                MediaPlayerState.PLAYING
+            }
+            MediaPlayerState.PREPARED, MediaPlayerState.PAUSED -> {
+                Log.d("MediaPlayer", "Starting media player")
+                mediaPlayerRepository.startMediaPlayer()
+                startUpdatingTrackPosition()
+                playerState = MediaPlayerState.PLAYING
+                renderState(PlayerState.Playing)
             }
             else -> {
-
                 return
             }
         }
     }
 
     fun preparePlayer(trackUrl: String): MediaPlayerState {
-        mediaPlayerRepository.prepareMediaPlayer(trackUrl, onPrepared = { renderState(PlayerState.Prepared) }, onCompletion = {renderState(PlayerState.Complete)})
+        mediaPlayerRepository.prepareMediaPlayer(trackUrl, onPrepared = {
+            playerState = MediaPlayerState.PREPARED
+            renderState(PlayerState.Prepared)
+        }, onCompletion = {
+            playerState = MediaPlayerState.PREPARED
+            renderState(PlayerState.Complete)
+        })
+        playerState = MediaPlayerState.PREPARED
+        renderState(PlayerState.Prepared)
         return MediaPlayerState.PREPARED
     }
 
     fun releaseMediaPlayer() {
         mediaPlayerRepository.releaseMediaPlayer()
+        stopUpdatingTrackPosition()
     }
 
-    private fun updateTrackTimer(){
-            if (mediaPlayerRepository.getCurrentPosition() == -1){
-                return
+    private fun startUpdatingTrackPosition() {
+        updateJob = viewModelScope.launch {
+            while (mediaPlayerRepository.isPlaying()) {
+                updateTrackTimer()
+                delay(UPDATE_POSITION_DELAY)
             }
-        val  trackPosition = mediaPlayerRepository.getCurrentPosition().toLong().convertLongToTimeMillis()
-        renderState(PlayerState.ChangePosition(trackPosition))
+        }
     }
 
-    private fun renderState (state: PlayerState){
+    private fun stopUpdatingTrackPosition() {
+        updateJob?.cancel()
+    }
+
+    private fun updateTrackTimer() {
+        val currentPosition = mediaPlayerRepository.getCurrentPosition()
+        if (currentPosition != -1) {
+            val trackPosition = currentPosition.toLong().convertLongToTimeMillis()
+            renderState(PlayerState.ChangePosition(trackPosition))
+        }
+    }
+
+    private fun renderState(state: PlayerState) {
+        Log.d("MediaPlayer", "Rendering state: $state")
         stateLiveData.postValue(state)
     }
-
-
 }
 
 private fun Long.convertLongToTimeMillis(): String {

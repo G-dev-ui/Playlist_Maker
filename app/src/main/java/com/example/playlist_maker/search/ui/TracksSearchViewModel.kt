@@ -3,13 +3,16 @@ package com.example.playlist_maker.search.ui
 
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.search.domain.repository.SearchHistoryRepository
 import com.example.playlist_maker.search.domain.TracksInteractor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class TracksSearchViewModel(
@@ -34,76 +37,51 @@ class TracksSearchViewModel(
     fun observeState(): LiveData<TracksState> = stateLiveData
 
     var lastSearchText: String? = null
-
+    private var searchJob: Job? = null
 
     override fun onCleared() {
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 
     fun searchDebounce(changedText: String) {
+        if (lastSearchText == changedText) {
+            return
+        }
 
-        this.lastSearchText = changedText
-        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
-        val searchRunnable = Runnable { performSearch(changedText) }
-        val postTime = SystemClock.uptimeMillis() + SEARCH_DEBOUNCE_DELAY
-        handler.postAtTime(
-            searchRunnable,
-            SEARCH_REQUEST_TOKEN,
-            postTime,
-        )
+        lastSearchText = changedText
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+           performSearch(changedText)
+        }
     }
 
 
     private fun performSearch(newSearchText: String) {
+        if (newSearchText.isNotEmpty()) {
+            renderState(TracksState.Loading)
 
-            if (newSearchText.isNotEmpty()) {
-                renderState(TracksState.Loading)
+            viewModelScope.launch {
+                tracksInteractor
+                    .searchTracks(newSearchText)
+                    .collect { pair ->
+                        val (foundTracks, errorMessage) = pair
 
-
-                tracksInteractor.searchTracks(
-                    newSearchText,
-                    object : TracksInteractor.TracksConsumer {
-                        override fun consume(foundTracks: List<Track>?, errorMessage: String?) {
-                            val tracks = mutableListOf<Track>()
-
-                            if (foundTracks != null) {
-                                tracks.addAll(foundTracks)
+                        when {
+                            errorMessage != null -> {
+                                renderState(TracksState.ConnectionError(errorMessage = errorMessage))
                             }
-
-                            when {
-                                errorMessage != null -> {
-                                    renderState(
-                                        TracksState.ConnectionError(
-                                            errorMessage = errorMessage
-                                        )
-                                    )
-
-                                }
-
-                                tracks.isEmpty() -> {
-                                    renderState(
-                                        TracksState.NothingFound(
-                                            message = String()
-                                        )
-                                    )
-
-                                }
-
-                                else -> {
-
-                                    renderState(
-                                        TracksState.Content(
-                                            tracks = tracks
-                                        )
-                                    )
-
-                                }
+                            foundTracks.isNullOrEmpty() -> {
+                                renderState(TracksState.NothingFound(message = "No tracks found"))
                             }
-
+                            else -> {
+                                renderState(TracksState.Content(tracks = foundTracks))
+                            }
                         }
-                    })
+                    }
             }
-
+        }
     }
 
 

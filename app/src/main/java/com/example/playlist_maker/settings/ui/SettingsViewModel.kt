@@ -1,14 +1,12 @@
 package com.example.playlist_maker.settings.ui
 
-import android.app.Application
+
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+
 
 import com.example.playlist_maker.settings.domain.SettingsInteractor
 import com.example.playlist_maker.sharing.domain.SharingInteractor
