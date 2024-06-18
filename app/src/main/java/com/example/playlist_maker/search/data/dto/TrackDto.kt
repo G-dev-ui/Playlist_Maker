@@ -10,5 +10,6 @@ data class TrackDto (
     val releaseDate: String?,
     val primaryGenreName: String?,
     val country: String,
-    val previewUrl: String? = null
+    val previewUrl: String? = null,
+    var insertTime: Long?
         )

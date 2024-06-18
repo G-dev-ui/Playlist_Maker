@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".music_library.ui.PlayListFragment">
+    tools:context=".music_library.ui.playlist.PlayListFragment">
 
     <Button
         android:id="@+id/search_refresh"

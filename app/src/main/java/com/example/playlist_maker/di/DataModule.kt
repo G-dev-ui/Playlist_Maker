@@ -3,6 +3,8 @@ package com.example.playlist_maker.di
 import android.content.Context
 import android.content.SharedPreferences
 import android.media.MediaPlayer
+import androidx.room.Room
+import com.example.playlist_maker.db.AppDatabase
 import com.example.playlist_maker.search.data.network.ItunesApiService
 import com.example.playlist_maker.search.data.network.NetworkClient
 import com.example.playlist_maker.search.data.network.RetrofitNetworkClient
@@ -39,7 +41,11 @@ val dataModel = module {
 
     factory { MediaPlayer() }
 
-
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .fallbackToDestructiveMigration()
+            .build()
+    }
 
     factory<NetworkClient> { RetrofitNetworkClient (context = get(), itunesApiService = get())}
 
