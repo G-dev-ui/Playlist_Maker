@@ -7,7 +7,7 @@ import java.util.Date
 
 class TrackDbConverter {
 
-    fun map(track: Track): TrackEntity {
+    fun map(track: Track, insertTime: Long = Date().time): TrackEntity {
         return TrackEntity(
             track.trackId,
             track.trackName,
@@ -19,7 +19,7 @@ class TrackDbConverter {
             track.primaryGenreName,
             track.country,
             track.previewUrl,
-            Date().time
+            insertTime
         )
     }
 

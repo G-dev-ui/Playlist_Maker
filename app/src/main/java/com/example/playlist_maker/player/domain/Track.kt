@@ -3,19 +3,18 @@ package com.example.playlist_maker.player.domain
 
 
 
-
 data class Track(
-    val trackId: Long?,
-    val trackName: String?,
-    val artistName: String?,
-    val trackTimeMillis: String?,
-    val artworkUrl100: String?,
-    val collectionName: String?,
-    val releaseDate: String?,
+    val trackId: Long,
+    val trackName: String,
+    val artistName: String,
+    val trackTimeMillis: String,
+    val artworkUrl100: String,
+    val collectionName: String,
+    val releaseDate: String,
     val primaryGenreName: String?,
     val country: String?,
     val previewUrl: String? = null,
-    var insertTime: Long?
+    val insertTime: Long?
 )
 
 fun Track.getCoverArtwork(): String? {

@@ -1,14 +1,12 @@
 package com.example.playlist_maker.music_library.ui.favorite
 
-import android.annotation.SuppressLint
+
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-
 import com.example.playlist_maker.databinding.FragmentFavoritesTracksBinding
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.ui.MediaActivity
@@ -77,9 +75,7 @@ class FavoritesTracksFragment : Fragment() {
         binding.progressBar.visibility = View.GONE
         binding.favoriteRecyclerView.visibility = View.VISIBLE
 
-        favoriteAdapter.tracks.clear()
-        favoriteAdapter.tracks.addAll(tracks)
-        favoriteAdapter.notifyDataSetChanged()
+        favoriteAdapter.updateTracks(tracks)
 
     }
 

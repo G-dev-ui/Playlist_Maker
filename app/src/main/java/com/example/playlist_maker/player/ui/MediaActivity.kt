@@ -3,8 +3,6 @@ package com.example.playlist_maker.player.ui
 
 
 import android.os.Bundle
-
-
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -59,14 +57,15 @@ class MediaActivity : AppCompatActivity() {
         val releaseDate = intent.getStringExtra("releaseDate") ?: ""
         val yearFormat = SimpleDateFormat("yyyy", Locale.getDefault())
         val formattedReleaseDate = try {
-            val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(releaseDate)
+            val date = yearFormat.parse(releaseDate)
             yearFormat.format(date)
         } catch (e: ParseException) {
             ""
         }
         val primaryGenreName = intent.getStringExtra("primaryGenreName") ?: ""
         val country = intent.getStringExtra("country") ?: ""
-        val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName, formattedReleaseDate, primaryGenreName, country, previewUrl, insertTime = null)
+        val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName,
+            formattedReleaseDate as String, primaryGenreName, country, previewUrl, insertTime = null)
 
         val coverImageView = findViewById<ImageView>(R.id.album_cover)
 
