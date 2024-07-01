@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".music_library.ui.FavoritesTracksFragment">
+    tools:context=".music_library.ui.favorite.FavoritesTracksFragment">
 
 
 <LinearLayout
@@ -14,7 +15,8 @@
     android:layout_gravity="center"
     android:orientation="vertical"
     android:layout_marginTop="102dp"
-    tools:visibility="visible"
+    tools:visibility="gone"
+
     >
     <ImageView
         android:src="@drawable/light_mode"
@@ -31,4 +33,24 @@
         android:layout_gravity="center"
         />
 </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/favorite_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/track_viwe"
+        tools:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/blue"
+        android:layout_marginTop="100dp"
+        android:visibility="gone"
+        />
+
 </LinearLayout>

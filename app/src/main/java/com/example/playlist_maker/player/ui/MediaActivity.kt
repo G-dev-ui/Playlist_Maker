@@ -3,13 +3,12 @@ package com.example.playlist_maker.player.ui
 
 
 import android.os.Bundle
-
-
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.playlist_maker.R
@@ -26,6 +25,7 @@ class MediaActivity : AppCompatActivity() {
 
     private lateinit var playButton: ImageButton
     private lateinit var durationTextView: TextView
+    private lateinit var likeButton: ImageButton
 
     private val mediaViewModel by viewModel<MediaPlayerViewModel>()
 
@@ -34,9 +34,13 @@ class MediaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_media)
 
         playButton = findViewById(R.id.playButton1)
+        likeButton = findViewById(R.id.likeButton)
         durationTextView = findViewById(R.id.durationTextView1)
 
         mediaViewModel.observeState().observe(this) { render(it) }
+        mediaViewModel.favoriteState.observe(this@MediaActivity, Observer { isFavorite ->
+            like(isFavorite)
+        })
 
         val backButton = findViewById<ImageButton>(R.id.back_button_playerActivity1)
         backButton.setOnClickListener {
@@ -53,14 +57,15 @@ class MediaActivity : AppCompatActivity() {
         val releaseDate = intent.getStringExtra("releaseDate") ?: ""
         val yearFormat = SimpleDateFormat("yyyy", Locale.getDefault())
         val formattedReleaseDate = try {
-            val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(releaseDate)
+            val date = yearFormat.parse(releaseDate)
             yearFormat.format(date)
         } catch (e: ParseException) {
             ""
         }
         val primaryGenreName = intent.getStringExtra("primaryGenreName") ?: ""
         val country = intent.getStringExtra("country") ?: ""
-        val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName, formattedReleaseDate, primaryGenreName, country, previewUrl)
+        val track = Track(trackId, trackName, artistName, trackTime, artworkUrl100, collectionName,
+            formattedReleaseDate as String, primaryGenreName, country, previewUrl, insertTime = null)
 
         val coverImageView = findViewById<ImageView>(R.id.album_cover)
 
@@ -102,6 +107,10 @@ class MediaActivity : AppCompatActivity() {
         playButton.setOnClickListener {
             mediaViewModel.playbackControl()
         }
+        mediaViewModel.isFavorite(track)
+        likeButton.setOnClickListener {
+            mediaViewModel.addToFavorite(track)
+        }
     }
 
     override fun onPause() {
@@ -122,6 +131,12 @@ class MediaActivity : AppCompatActivity() {
             is PlayerState.Playing -> PlayerStart()
             is PlayerState.Pause -> PlayerPaused()
             is PlayerState.Complete -> TrackComplete()
+        }
+    }
+    private fun like(isFavoriteState: FavoriteState) {
+        when (isFavoriteState) {
+            FavoriteState(true) -> likeButton.setImageResource(R.drawable.button_like)
+            FavoriteState(false) -> likeButton.setImageResource(R.drawable.like_buttom)
         }
     }
 

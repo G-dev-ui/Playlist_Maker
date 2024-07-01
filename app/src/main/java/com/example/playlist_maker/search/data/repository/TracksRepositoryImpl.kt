@@ -1,7 +1,7 @@
 package com.example.playlist_maker.search.data.repository
 
 
-import com.example.playlist_maker.resource.Resource
+import com.example.playlist_maker.util.Resource
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.search.data.dto.TracksSearchRequest
 import com.example.playlist_maker.search.data.dto.TracksSearchResponse
@@ -30,7 +30,8 @@ class TracksRepositoryImpl(private val networkClient: NetworkClient) : TracksRep
                             it.releaseDate,
                             it.primaryGenreName,
                             it.country,
-                            it.previewUrl
+                            it.previewUrl,
+                            it.insertTime
                         )
                     }
                     emit(Resource.Success(data))

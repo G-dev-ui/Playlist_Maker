@@ -7,8 +7,9 @@ data class TrackDto (
     val trackTimeMillis: String,
     val artworkUrl100: String,
     val collectionName: String,
-    val releaseDate: String?,
+    val releaseDate: String,
     val primaryGenreName: String?,
     val country: String,
-    val previewUrl: String? = null
+    val previewUrl: String? = null,
+    var insertTime: Long?
         )

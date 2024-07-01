@@ -10,15 +10,16 @@ data class Track(
     val trackTimeMillis: String,
     val artworkUrl100: String,
     val collectionName: String,
-    val releaseDate: String?,
+    val releaseDate: String,
     val primaryGenreName: String?,
-    val country: String,
-    val previewUrl: String? = null
+    val country: String?,
+    val previewUrl: String? = null,
+    val insertTime: Long?
 )
 
-fun Track.getCoverArtwork(): String {
+fun Track.getCoverArtwork(): String? {
     return try {
-        artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+        artworkUrl100?.replaceAfterLast('/', "512x512bb.jpg")
     } catch (e: StringIndexOutOfBoundsException) {
 
         artworkUrl100

@@ -1,4 +1,4 @@
-package com.example.playlist_maker.music_library.ui
+package com.example.playlist_maker.music_library.ui.playlist
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
