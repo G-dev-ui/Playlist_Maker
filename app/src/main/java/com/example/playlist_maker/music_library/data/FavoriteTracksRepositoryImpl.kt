@@ -25,7 +25,7 @@ class FavoriteTracksRepositoryImpl(
         appDatabase.tracksDao().deleteTrackEntity(trackId)
     }
 
-    override suspend fun isFavoriteTrack(trackId: Long): Flow<Boolean> = flow {
+    override suspend fun isFavoriteTrack(trackId: Int): Flow<Boolean> = flow {
         val isFavorite = appDatabase.tracksDao().isFavoriteTrack(trackId)
         emit(isFavorite)
     }

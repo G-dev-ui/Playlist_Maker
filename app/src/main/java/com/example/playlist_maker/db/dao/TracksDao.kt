@@ -22,6 +22,6 @@ interface TracksDao {
     suspend fun getTracks(): List<TrackEntity>
 
     @Query("SELECT EXISTS (SELECT 1 FROM favorite_tracks_tablet  WHERE trackId = :trackId)")
-    suspend fun isFavoriteTrack(trackId: kotlin.Long): Boolean
+    suspend fun isFavoriteTrack(trackId: kotlin.Int): Boolean
 
 }

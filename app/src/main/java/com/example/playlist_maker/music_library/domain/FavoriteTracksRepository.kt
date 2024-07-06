@@ -10,5 +10,5 @@ interface FavoriteTracksRepository {
 
     suspend fun deleteTrack(trackId: Int)
 
-    suspend fun isFavoriteTrack(trackId: Long): Flow<Boolean>
+    suspend fun isFavoriteTrack(trackId: Int): Flow<Boolean>
 }

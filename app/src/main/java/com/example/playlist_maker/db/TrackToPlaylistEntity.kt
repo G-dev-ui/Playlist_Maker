@@ -2,10 +2,11 @@ package com.example.playlist_maker.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.playlist_maker.util.TRACKS_IN_PLAYLIST
 
-@Entity(tableName ="favorite_tracks_tablet")
-data class TrackEntity(
-    @PrimaryKey
+@Entity(tableName = TRACKS_IN_PLAYLIST)
+data class TrackToPlaylistEntity(
+    @PrimaryKey(autoGenerate = true)
     val trackId: Int,
     val trackName: String,
     val artistName: String,
@@ -16,6 +17,5 @@ data class TrackEntity(
     val primaryGenreName: String?,
     val country: String?,
     val previewUrl: String?,
-    val insertTime: Long?
-
+    var insertTime: Long?
 )

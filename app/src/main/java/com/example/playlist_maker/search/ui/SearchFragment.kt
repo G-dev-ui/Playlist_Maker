@@ -1,7 +1,6 @@
 package com.example.playlist_maker.search.ui
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,15 +14,15 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-
-
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.playlist_maker.R
 import com.example.playlist_maker.databinding.FragmentSearchBinding
+import com.example.playlist_maker.main.ui.MainActivity
 import com.example.playlist_maker.player.domain.Track
-import com.example.playlist_maker.player.ui.MediaActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -44,52 +43,19 @@ class SearchFragment : Fragment() {
 
     companion object {
         private const val CLICK_DEBOUNCE_DELAY = 2000L
+        private const val SEARCH_QUERY_HISTORY = "SEARCH_QUERY_HISTORY"
     }
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
-
     private var isClickAllowed = true
-
 
     private val viewModel by viewModel<TracksSearchViewModel>()
 
-    private val historyadapter = TrackAdapter(mutableListOf()) { track ->
-        if (clickDebounce()) {
-            viewModel.moveSearchHistoryToTop(track)
-            val intent = Intent(requireActivity(), MediaActivity::class.java)
-            intent.putExtra("trackId", track.trackId)
-            intent.putExtra("trackName", track.trackName)
-            intent.putExtra("artistName", track.artistName)
-            intent.putExtra("trackTime", track.trackTimeMillis)
-            intent.putExtra("artworkUrl100", track.artworkUrl100)
-            intent.putExtra("collectionName", track.collectionName)
-            intent.putExtra("releaseDate", track.releaseDate)
-            intent.putExtra("primaryGenreName", track.primaryGenreName)
-            intent.putExtra("country", track.country)
-            intent.putExtra("previewUrl", track.previewUrl)
-            startActivity(intent)
-        }
-    }
+    private val historyAdapter = TrackAdapter()
 
-    private val adapter = TrackAdapter(mutableListOf()) { track ->
-        if (clickDebounce()) {
-            viewModel.addToSearchHistory(track)
-            val intent = Intent(requireActivity(), MediaActivity::class.java)
-            intent.putExtra("trackId", track.trackId)
-            intent.putExtra("trackName", track.trackName)
-            intent.putExtra("artistName", track.artistName)
-            intent.putExtra("trackTime", track.trackTimeMillis)
-            intent.putExtra("artworkUrl100", track.artworkUrl100)
-            intent.putExtra("collectionName", track.collectionName)
-            intent.putExtra("releaseDate", track.releaseDate)
-            intent.putExtra("primaryGenreName", track.primaryGenreName)
-            intent.putExtra("country", track.country)
-            intent.putExtra("previewUrl", track.previewUrl)
-            startActivity(intent)
-        }
-    }
+    private val adapter = TrackAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,9 +66,10 @@ class SearchFragment : Fragment() {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (activity as? MainActivity)?.showNavBar()
 
         viewModel.stateHistory.observe(viewLifecycleOwner) {
             showHistory(it)
@@ -111,8 +78,6 @@ class SearchFragment : Fragment() {
         viewModel.observeState().observe(viewLifecycleOwner) {
             render(it)
         }
-
-
 
         searchBar = binding.searchBar
         emptyResultPlaceholder = binding.emptyResultPlaceholder
@@ -124,8 +89,6 @@ class SearchFragment : Fragment() {
         searchHistoryRecyclerView = binding.trackHistory
         progressBar = binding.progressBar
         tracksList = binding.rvTrack
-
-
 
         tracksList.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -144,20 +107,29 @@ class SearchFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         }
-        textWatcher?.let { searchBar.addTextChangedListener(it) }
+        searchBar.addTextChangedListener(textWatcher)
 
+        adapter.itemClickListener = {
+            if (clickDebounce()) {
+                viewModel.moveSearchHistoryToTop(it)
+                openAudioPlayer(it)
+            }
+        }
 
+        historyAdapter.itemClickListener = {
+            if (clickDebounce()) {
+                viewModel.addToSearchHistory(it)
+                openAudioPlayer(it)
+            }
+        }
 
-        searchHistoryRecyclerView.adapter = historyadapter
+        searchHistoryRecyclerView.adapter = historyAdapter
         searchHistoryRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
-
         clearHistoryButton.setOnClickListener {
             viewModel.clearHistory()
-
         }
-
 
         resetButton.setOnClickListener {
             searchBar.setText("")
@@ -173,9 +145,8 @@ class SearchFragment : Fragment() {
 
         refreshButton.setOnClickListener {
             val lastEnteredText = searchBar.text.toString()
-            viewModel.searchDebounce(changedText =  lastEnteredText)
+            viewModel.searchDebounce(changedText = lastEnteredText)
         }
-
     }
 
     override fun onDestroyView() {
@@ -194,7 +165,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-
     private fun showEmptyState() {
         searchBar.text.clear()
         searchHistoryLayout.isVisible = false
@@ -206,17 +176,10 @@ class SearchFragment : Fragment() {
         errorPlaceholder.isVisible = false
         progressBar.isVisible = false
         tracksList.isVisible = false
-
-
         if (searchHistoryList.isNotEmpty()) {
             searchHistoryLayout.isVisible = true
-
-            historyadapter.tracks.clear()
-            historyadapter.tracks.addAll(searchHistoryList)
-            historyadapter.notifyDataSetChanged()
+            historyAdapter.updateTracks(searchHistoryList)
         }
-
-
     }
 
     private fun showEmpty() {
@@ -237,12 +200,8 @@ class SearchFragment : Fragment() {
         searchHistoryLayout.isVisible = false
         progressBar.isVisible = false
         tracksList.isVisible = true
-        adapter.tracks.clear()
-        adapter.tracks.addAll(tracks)
-        adapter.notifyDataSetChanged()
-
+        adapter.updateTracks(tracks)
     }
-
 
     private fun showLoading() {
         tracksList.isVisible = false
@@ -252,16 +211,21 @@ class SearchFragment : Fragment() {
         searchHistoryLayout.isVisible = false
     }
 
+    override fun onResume() {
+        super.onResume()
+        isClickAllowed = true
+    }
+
     private fun clickDebounce(): Boolean {
-        val current = isClickAllowed
-        if (isClickAllowed) {
-            isClickAllowed = false
-            viewLifecycleOwner.lifecycleScope.launch {
-                delay(CLICK_DEBOUNCE_DELAY)
-                isClickAllowed = true
-            }
+        if (!isClickAllowed) {
+            return false
         }
-        return current
+        isClickAllowed = false
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(CLICK_DEBOUNCE_DELAY)
+            isClickAllowed = true
+        }
+        return true
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -272,6 +236,13 @@ class SearchFragment : Fragment() {
         }
     }
 
-
-
+    private fun openAudioPlayer(track: Track) {
+        val bundle = Bundle().apply {
+            putParcelable(SEARCH_QUERY_HISTORY, track)
+        }
+        findNavController().navigate(
+            R.id.action_searchFragment_to_audioPlayerFragment,
+            bundle
+        )
+    }
 }

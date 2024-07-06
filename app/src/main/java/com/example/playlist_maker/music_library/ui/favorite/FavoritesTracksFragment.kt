@@ -1,36 +1,28 @@
 package com.example.playlist_maker.music_library.ui.favorite
 
 
-import android.content.Intent
+
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
+import com.example.playlist_maker.R
 import com.example.playlist_maker.databinding.FragmentFavoritesTracksBinding
+import com.example.playlist_maker.main.ui.MainActivity
 import com.example.playlist_maker.player.domain.Track
-import com.example.playlist_maker.player.ui.MediaActivity
 import com.example.playlist_maker.search.ui.TrackAdapter
+import com.example.playlist_maker.util.SEARCH_QUERY_HISTORY
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FavoritesTracksFragment : Fragment() {
 
     private var _binding: FragmentFavoritesTracksBinding? = null
     private val binding get() = _binding!!
-    private val favoriteAdapter = TrackAdapter(mutableListOf()) { track ->
-            val intent = Intent(requireActivity(), MediaActivity::class.java)
-            intent.putExtra("trackId", track.trackId)
-            intent.putExtra("trackName", track.trackName)
-            intent.putExtra("artistName", track.artistName)
-            intent.putExtra("trackTime", track.trackTimeMillis)
-            intent.putExtra("artworkUrl100", track.artworkUrl100)
-            intent.putExtra("collectionName", track.collectionName)
-            intent.putExtra("releaseDate", track.releaseDate)
-            intent.putExtra("primaryGenreName", track.primaryGenreName)
-            intent.putExtra("country", track.country)
-            intent.putExtra("previewUrl", track.previewUrl)
-            startActivity(intent)
-    }
+    private var favoriteAdapter = TrackAdapter()
+
+
     private val vm by viewModel<FavoritesTracksViewModel>()
 
 
@@ -50,6 +42,11 @@ class FavoritesTracksFragment : Fragment() {
         binding.libraryEmpty.visibility = View.GONE
         binding.favoriteRecyclerView.adapter = favoriteAdapter
 
+        (activity as? MainActivity)?.showNavBar()
+
+        favoriteAdapter.itemClickListener = {
+            openAudioPlayer(track = it)
+        }
 
         vm.favoriteState.observe(viewLifecycleOwner) {
             execute(it)
@@ -96,6 +93,15 @@ class FavoritesTracksFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun openAudioPlayer(track: Track) {
+        val bundle = Bundle()
+        bundle.putParcelable(SEARCH_QUERY_HISTORY, track)
+        findNavController().navigate(
+            R.id.action_mediaLibraryFragment_to_audioPlayerFragment,
+            bundle
+        )
     }
 
     companion object {
