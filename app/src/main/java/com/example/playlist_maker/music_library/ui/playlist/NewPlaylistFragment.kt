@@ -86,7 +86,7 @@ class NewPlaylistFragment : Fragment() {
 
         }
 
-        binding.toolbarNewPlaylist.setOnClickListener {
+        binding.toolbarNewPlaylist.setNavigationOnClickListener  {
             if (showedDialog) {
                 showDialog()
             } else {

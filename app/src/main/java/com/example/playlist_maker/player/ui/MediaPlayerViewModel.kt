@@ -16,8 +16,6 @@ import com.example.playlist_maker.player.domain.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -40,8 +38,10 @@ class MediaPlayerViewModel(
     private val _favoriteState = MutableLiveData<FavoriteState>()
     val favoriteState: LiveData<FavoriteState> = _favoriteState
 
-    private val _playlistsState = MutableStateFlow<PlaylistState>(PlaylistState.Empty)
-    val playlistState: StateFlow<PlaylistState> = _playlistsState
+    private val _playlistsState = MutableLiveData<PlaylistState>()
+    val playlistsState: LiveData<PlaylistState> = _playlistsState
+
+
 
     fun isFavorite(track: Track) {
         viewModelScope.launch {
@@ -142,9 +142,9 @@ class MediaPlayerViewModel(
             val updatedPlaylist = updatedPlaylists.firstOrNull { it.id == playlist.id }
             updatedPlaylist?.let {
                 it.tracksIds = it.tracksIds + "," + track.trackId.toString()
-                it.tracksAmount = it.tracksIds.split(",").size
+                it.tracksAmount = it.tracksIds.split(",").filter { it.isNotEmpty() }.size
                 playlistsInteractor.updatePlaylist(it)
-                _playlistsState.value = PlaylistState.Data(updatedPlaylists)
+                _playlistsState.postValue(PlaylistState.Data(updatedPlaylists))
             }
         }
     }
@@ -154,9 +154,9 @@ class MediaPlayerViewModel(
             try {
                 val playlists = playlistsInteractor.getPlaylists()
                 if (playlists.isEmpty()) {
-                    _playlistsState.value = PlaylistState.Empty
+                    _playlistsState.postValue(PlaylistState.Empty)
                 } else {
-                    _playlistsState.value = PlaylistState.Data(playlists)
+                    _playlistsState.postValue(PlaylistState.Data(playlists))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -8,7 +8,7 @@ import com.example.playlist_maker.db.dao.PlaylistsDao
 import com.example.playlist_maker.db.dao.TracksDao
 
 @Database(
-    version = 2,
+    version = 1,
     entities = [TrackEntity::class, PlaylistEntity::class, TrackToPlaylistEntity::class]
 )
 @TypeConverters(TracksIdsConverter::class)

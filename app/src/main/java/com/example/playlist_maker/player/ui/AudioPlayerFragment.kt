@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -24,9 +23,8 @@ import com.example.playlist_maker.main.ui.MainActivity
 import com.example.playlist_maker.music_library.domain.Playlist
 import com.example.playlist_maker.music_library.domain.PlaylistState
 import com.example.playlist_maker.player.domain.Track
+import com.example.playlist_maker.player.domain.getCoverArtwork
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -45,7 +43,6 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
     private val mediaViewModel by viewModel<MediaPlayerViewModel>()
     private lateinit var adapter: AudioPlayerAdapter
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -62,28 +59,30 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         likeButton = view.findViewById(R.id.likeButton)
         durationTextView = view.findViewById(R.id.durationTextView1)
 
-
-
-
         mediaViewModel.observeState().observe(viewLifecycleOwner) { render(it) }
-        mediaViewModel.playlistState.onEach { state -> playlistStateManage(state) }
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+
+        mediaViewModel.playlistsState.observe(viewLifecycleOwner) { state ->
+            playlistStateManage(state)
+        }
+
         mediaViewModel.favoriteState.observe(viewLifecycleOwner, Observer { isFavorite ->
             like(isFavorite)
         })
 
         (activity as? MainActivity)?.hideNavBar()
+
+
+
         val backButton = view.findViewById<Toolbar>(R.id.back_button_playerActivity1)
         backButton.setOnClickListener {
             activity?.onBackPressed()
         }
         track = arguments?.getParcelable<Track>(SEARCH_QUERY_HISTORY) as Track
 
-
         val coverImageView = view.findViewById<ImageView>(R.id.album_cover)
 
         Glide.with(this)
-            .load(track.artworkUrl100)
+            .load(track.getCoverArtwork())
             .apply(
                 RequestOptions()
                     .placeholder(R.drawable.placeholder2)
@@ -91,25 +90,16 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
             )
             .into(coverImageView)
 
-        val trackNameTextView = view.findViewById<TextView>(R.id.trackNamePlayerActivity)
-        val artistNameTextView = view.findViewById<TextView>(R.id.artistNamePlayerActivity1)
-        val trackTimeTextView = view.findViewById<TextView>(R.id.durationValue1)
-        val collectionNameTextView = view.findViewById<TextView>(R.id.albumValue1)
-        val releaseDateTextView = view.findViewById<TextView>(R.id.yearValue1)
-        val primaryGenreNameTextView = view.findViewById<TextView>(R.id.genreValue1)
-        val countryTextView = view.findViewById<TextView>(R.id.countryValue1)
-
-        trackNameTextView.text = track.trackName
-        artistNameTextView.text = track.artistName
-        trackTimeTextView.text = track.trackTimeMillis.toString()
-        collectionNameTextView.text = track.collectionName ?: ""
-        releaseDateTextView.text = LocalDateTime.parse(
+        binding.trackNamePlayerActivity.text = track.trackName
+        binding.artistNamePlayerActivity1.text = track.artistName
+        binding.durationValue1.text = track.trackTimeMillis.toString()
+        binding.albumValue1.text = track.collectionName ?: ""
+        binding.yearValue1.text = LocalDateTime.parse(
             track.releaseDate,
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
         ).year.toString()
-
-        primaryGenreNameTextView.text = track.primaryGenreName
-        countryTextView.text = track.country
+        binding.genreValue1.text = track.primaryGenreName
+        binding.countryValue1.text = track.country
 
         if (track.previewUrl?.isNotEmpty() == true) {
             track.previewUrl?.let { mediaViewModel.preparePlayer(it) }
@@ -158,6 +148,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
         binding.bottomSheetAddPlaylistBtn.setOnClickListener {
             findNavController().navigate(R.id.action_audioPlayerFragment_to_newPlaylistFragment)
+            mediaViewModel.getPlaylists()
         }
 
         mediaViewModel.getPlaylists()
@@ -213,7 +204,6 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         durationTextView.setText(R.string.durationSample2)
     }
 
-
     private fun playlistStateManage(state: PlaylistState) {
         when (state) {
             is PlaylistState.Empty -> {
@@ -225,16 +215,11 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
                 binding.bottomSheetRecyclerView.visibility = View.VISIBLE
                 adapter.playlists = playlists as ArrayList<Playlist>
                 adapter.notifyDataSetChanged()
-
-                playlists.forEach { playlist ->
-                    playlist.tracksAmount = playlist.tracksIds.split(",").size
-                }
             }
 
             else -> {}
         }
     }
-
 
     override fun onClick(playlist: Playlist) {
         if (!mediaViewModel.inPlaylist(

@@ -17,16 +17,10 @@
         android:theme="@style/Base.Theme.Playlist_Maker"
         tools:targetApi="31">
 
-
-        <activity
-            android:name=".player.ui.MediaActivity"
-            android:exported="false"
-            />
-
         <activity
             android:name=".main.ui.MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustNothing"
+            android:windowSoftInputMode="adjustPan"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

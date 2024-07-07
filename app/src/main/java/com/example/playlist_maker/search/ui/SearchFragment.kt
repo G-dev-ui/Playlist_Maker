@@ -107,18 +107,20 @@ class SearchFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         }
-        searchBar.addTextChangedListener(textWatcher)
+
+        textWatcher?.let { searchBar.addTextChangedListener(it) }
+
 
         adapter.itemClickListener = {
             if (clickDebounce()) {
-                viewModel.moveSearchHistoryToTop(it)
+                viewModel.addToSearchHistory(it)
                 openAudioPlayer(it)
             }
         }
 
         historyAdapter.itemClickListener = {
             if (clickDebounce()) {
-                viewModel.addToSearchHistory(it)
+                viewModel.moveSearchHistoryToTop(it)
                 openAudioPlayer(it)
             }
         }
