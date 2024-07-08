@@ -71,8 +71,6 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
         (activity as? MainActivity)?.hideNavBar()
 
-
-
         val backButton = view.findViewById<Toolbar>(R.id.back_button_playerActivity1)
         backButton.setOnClickListener {
             activity?.onBackPressed()
@@ -119,10 +117,11 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
         binding.bottomSheetRecyclerView.adapter = adapter
 
-        val bottomSheetState = BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).apply {
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
         }
-        bottomSheetState.addBottomSheetCallback(object :
+
+        bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             @SuppressLint("NotifyDataSetChanged")
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -130,7 +129,6 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
                     BottomSheetBehavior.STATE_HIDDEN -> {
                         binding.bottomSheetOverlay.visibility = View.GONE
                     }
-
                     else -> {
                         adapter.notifyDataSetChanged()
                         binding.bottomSheetOverlay.visibility = View.VISIBLE
@@ -142,7 +140,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         })
 
         binding.addToCollectionButton1.setOnClickListener {
-            bottomSheetState.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             adapter.notifyDataSetChanged()
         }
 
@@ -209,46 +207,35 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
             is PlaylistState.Empty -> {
                 binding.bottomSheetRecyclerView.visibility = View.GONE
             }
-
             is PlaylistState.Data -> {
-                val playlists = state.tracks
                 binding.bottomSheetRecyclerView.visibility = View.VISIBLE
-                adapter.playlists = playlists as ArrayList<Playlist>
+                adapter.playlists = state.playlists as ArrayList<Playlist>
                 adapter.notifyDataSetChanged()
-            }
 
+                when (state.status) {
+                    "added" -> {
+                        Toast.makeText(
+                            requireContext().applicationContext,
+                            "${getString(R.string.added_to_playlist)} ${state.playlistName}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).state = BottomSheetBehavior.STATE_HIDDEN
+                    }
+                    "exists" -> {
+                        Toast.makeText(
+                            requireContext().applicationContext,
+                            "${getString(R.string.already_in_playlist)} ${state.playlistName}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
             else -> {}
         }
     }
 
     override fun onClick(playlist: Playlist) {
-        if (!mediaViewModel.inPlaylist(
-                playlist = playlist,
-                trackId = track.trackId?.toLong() ?: 0
-            )
-        ) {
-            mediaViewModel.clickOnAddtoPlaylist(playlist = playlist, track = track)
-            Toast.makeText(
-                requireContext().applicationContext,
-                "${getString(R.string.added_to_playlist)} ${playlist.name}",
-                Toast.LENGTH_SHORT
-            )
-                .show()
-
-            playlist.tracksAmount = playlist.tracksIds.split(",").size
-
-            BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).apply {
-                state = BottomSheetBehavior.STATE_HIDDEN
-            }
-        } else {
-            Toast.makeText(
-                requireContext().applicationContext,
-                "${getString(R.string.already_in_playlist)} ${playlist.name}",
-                Toast.LENGTH_SHORT
-            )
-                .show()
-        }
-        adapter.notifyDataSetChanged()
+        mediaViewModel.clickOnAddtoPlaylist(playlist, track)
     }
 
     override fun onResume() {

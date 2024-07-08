@@ -134,20 +134,21 @@ class MediaPlayerViewModel(
     fun inPlaylist(playlist: Playlist, trackId: Long): Boolean {
         return playlist.tracksIds.contains(trackId.toString())
     }
-    fun clickOnAddtoPlaylist(playlist: Playlist, track: Track) {
-        viewModelScope.launch {
-            playlistsInteractor.addTrackToPlaylist(playlist, track)
-
-            val updatedPlaylists = playlistsInteractor.getPlaylists()
-            val updatedPlaylist = updatedPlaylists.firstOrNull { it.id == playlist.id }
-            updatedPlaylist?.let {
-                it.tracksIds = it.tracksIds + "," + track.trackId.toString()
-                it.tracksAmount = it.tracksIds.split(",").filter { it.isNotEmpty() }.size
-                playlistsInteractor.updatePlaylist(it)
-                _playlistsState.postValue(PlaylistState.Data(updatedPlaylists))
-            }
-        }
-    }
+  fun clickOnAddtoPlaylist(playlist: Playlist, track: Track) {
+      viewModelScope.launch {
+          val updatedPlaylists = playlistsInteractor.getPlaylists()
+          val updatedPlaylist = updatedPlaylists.firstOrNull { it.id == playlist.id }
+          if (updatedPlaylist != null && !inPlaylist(updatedPlaylist, track.trackId?.toLong() ?: 0)) {
+              playlistsInteractor.addTrackToPlaylist(updatedPlaylist, track)
+              updatedPlaylist.tracksIds = updatedPlaylist.tracksIds + "," + track.trackId.toString()
+              updatedPlaylist.tracksAmount = updatedPlaylist.tracksIds.split(",").filter { it.isNotEmpty() }.size
+              playlistsInteractor.updatePlaylist(updatedPlaylist)
+              _playlistsState.postValue(PlaylistState.Data(updatedPlaylists, "added", playlist.name))
+          } else {
+              _playlistsState.postValue(PlaylistState.Data(updatedPlaylists, "exists", playlist.name))
+          }
+      }
+  }
 
     fun getPlaylists() {
         viewModelScope.launch(Dispatchers.IO) {

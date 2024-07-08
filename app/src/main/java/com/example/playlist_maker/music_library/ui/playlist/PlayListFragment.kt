@@ -68,7 +68,7 @@ class PlayListFragment : Fragment(), PlaylistsViewHolder.ClickListener {
     private fun execute(state: PlaylistState) {
         when (state) {
             is PlaylistState.Data -> {
-                val playlists = state.tracks
+                val playlists = state.playlists
                 showData()
                 adapter.playlists = playlists as ArrayList<Playlist>
                 adapter.notifyDataSetChanged()
