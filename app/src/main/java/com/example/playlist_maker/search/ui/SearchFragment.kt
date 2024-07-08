@@ -118,6 +118,21 @@ class SearchFragment : Fragment() {
             }
         }
 
+        adapter.setOnItemLongClickListener {
+            if (clickDebounce()) {
+                viewModel.addToSearchHistory(it)
+                openAudioPlayer(it)
+            }
+        }
+
+        historyAdapter.setOnItemLongClickListener {
+            if (clickDebounce()) {
+                viewModel.moveSearchHistoryToTop(it)
+                openAudioPlayer(it)
+            }
+
+        }
+
         historyAdapter.itemClickListener = {
             if (clickDebounce()) {
                 viewModel.moveSearchHistoryToTop(it)

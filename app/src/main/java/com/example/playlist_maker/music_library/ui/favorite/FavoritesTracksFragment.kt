@@ -44,6 +44,10 @@ class FavoritesTracksFragment : Fragment() {
 
         (activity as? MainActivity)?.showNavBar()
 
+        favoriteAdapter.setOnItemLongClickListener {
+            openAudioPlayer(track = it)
+        }
+
         favoriteAdapter.itemClickListener = {
             openAudioPlayer(track = it)
         }

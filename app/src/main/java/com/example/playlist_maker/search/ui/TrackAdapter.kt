@@ -29,6 +29,10 @@ class TrackAdapter : RecyclerView.Adapter<TrackViewHolder>() {
         notifyDataSetChanged()
     }
 
+    fun setOnItemLongClickListener(listener: (Track) -> Unit) {
+        itemLongClickListener = listener
+    }
+
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(tracks[position])
@@ -40,6 +44,12 @@ class TrackAdapter : RecyclerView.Adapter<TrackViewHolder>() {
             itemLongClickListener.invoke(tracks[position])
             true
         }
+
+        holder.itemView.setOnLongClickListener {
+            itemLongClickListener.invoke(tracks[position])
+            true
+        }
+
     }
 
 }
