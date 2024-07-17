@@ -34,6 +34,23 @@
     <string name="search" translatable="false">Поиск</string>
     <string name="media_library" translatable="false">Медиатека</string>
     <string name="settings" translatable="false">Настройки</string>
+    <string name="playlist_title" translatable="false">Название*</string>
+    <string name="description" translatable="false">Описание</string>
+    <string name="playlist_create" translatable="false">Создать</string>
+    <string name="dialog_title" translatable="false">Завершить создание плейлиста?</string>
+    <string name="dialog_message" translatable="false">Все несохраненные данные будут потеряны
+</string>
 
+    <string name="ap_duration" translatable="false">Длительность</string>
+    <string name="ap_album" translatable="false">Альбом</string>
+    <string name="ap_year" translatable="false">Год</string>
+    <string name="ap_genre" translatable="false">Жанр</string>
+    <string name="ap_country" translatable="false">Страна</string>
+    <string name="playlist_add" translatable="false">Добавить в плейлист</string>
+    <string name="track_multiplie" translatable="false">треков</string>
+    <string name="track_one" translatable="false">трек</string>
+    <string name="track_several" translatable="false">трека</string>
+    <string name="added_to_playlist" translatable="false">Трек добавлен</string>
+    <string name="already_in_playlist" translatable="false">Трек, уже добавленный в плейлист</string>
 
 </resources>

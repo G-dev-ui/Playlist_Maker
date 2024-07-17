@@ -1,30 +1,18 @@
 package com.example.playlist_maker.search.ui
 
-import android.os.SystemClock
+
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.playlist_maker.R
 import com.example.playlist_maker.player.domain.Track
 
-class TrackAdapter(var tracks: MutableList<Track>, private val onItemClick: (Track) -> Unit) : RecyclerView.Adapter<TrackViewHolder>() {
+class TrackAdapter : RecyclerView.Adapter<TrackViewHolder>() {
 
-    private var itemClickListener: OnItemClickListener? = null
-    private var lastClickTime: Long = 0
+    var tracks: ArrayList<Track> = ArrayList()
+    lateinit var itemClickListener: ((Track) -> Unit)
 
-    interface OnItemClickListener {
-        fun onItemClick(position: Int)
-    }
-
-    fun setOnItemClickListener(listener: OnItemClickListener) {
-        this.itemClickListener = listener
-    }
-
-    fun updateTracks(newTracks: List<Track>) {
-        tracks.clear()
-        tracks.addAll(newTracks)
-        notifyDataSetChanged()
-    }
+    lateinit var itemLongClickListener: ((Track) -> Unit)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.track_viwe, parent, false)
@@ -35,16 +23,33 @@ class TrackAdapter(var tracks: MutableList<Track>, private val onItemClick: (Tra
         return tracks.size
     }
 
-    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
-        val track = tracks[position]
-        holder.bind(track)
-
-        holder.itemView.setOnClickListener {
-            if (SystemClock.elapsedRealtime() - lastClickTime < 1000){
-                return@setOnClickListener
-            }
-            lastClickTime = SystemClock.elapsedRealtime()
-            onItemClick(track)
-        }
+    fun updateTracks(newTracks: List<Track>) {
+        tracks.clear()
+        tracks.addAll(newTracks)
+        notifyDataSetChanged()
     }
+
+    fun setOnItemLongClickListener(listener: (Track) -> Unit) {
+        itemLongClickListener = listener
+    }
+
+
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
+        holder.bind(tracks[position])
+        holder.itemView.setOnClickListener {
+            itemClickListener.invoke(tracks[position])
+            this.notifyItemRangeChanged(0, tracks.size)
+        }
+        holder.itemView.setOnLongClickListener {
+            itemLongClickListener.invoke(tracks[position])
+            true
+        }
+
+        holder.itemView.setOnLongClickListener {
+            itemLongClickListener.invoke(tracks[position])
+            true
+        }
+
+    }
+
 }

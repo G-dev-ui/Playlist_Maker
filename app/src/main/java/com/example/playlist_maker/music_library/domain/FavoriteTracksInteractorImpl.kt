@@ -17,7 +17,7 @@ class FavoriteTracksInteractorImpl(private val favoriteTracksRepository: Favorit
         return favoriteTracksRepository.deleteTrack(trackId = trackId)
     }
 
-    override suspend fun isFavoriteTrack(trackId: Long): Flow<Boolean> {
+    override suspend fun isFavoriteTrack(trackId: Int): Flow<Boolean> {
         return favoriteTracksRepository.isFavoriteTrack(trackId)
     }
 }

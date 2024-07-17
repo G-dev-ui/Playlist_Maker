@@ -6,4 +6,7 @@
 <color name="transparent">#FFFFFFFF</color>
     <color name="gray">#CFCFCF</color>
     <color name="black2">#FF000000</color>
+    <color name="gray1">#AEAFB4</color>
+    <color name="yp_blue_light">#9FBBF3</color>
+    <color name="background_main">#3772E7</color>
 </resources>

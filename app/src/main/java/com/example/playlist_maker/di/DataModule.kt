@@ -41,11 +41,15 @@ val dataModel = module {
 
     factory { MediaPlayer() }
 
+
+
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
             .fallbackToDestructiveMigration()
             .build()
     }
+
+
 
     factory<NetworkClient> { RetrofitNetworkClient (context = get(), itunesApiService = get())}
 
