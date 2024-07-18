@@ -9,4 +9,6 @@
     <color name="gray1">#AEAFB4</color>
     <color name="yp_blue_light">#9FBBF3</color>
     <color name="background_main">#3772E7</color>
+    <color name="yandex_light_gray">#E6E8EB</color>
+    <color name="back_transparent">#99000000</color>
 </resources>

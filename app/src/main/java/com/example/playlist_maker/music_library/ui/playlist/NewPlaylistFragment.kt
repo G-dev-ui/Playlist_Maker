@@ -21,7 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-class NewPlaylistFragment : Fragment() {
+open class NewPlaylistFragment : Fragment() {
     private var _binding: FragmentNewPlaylistBinding? = null
     val binding get() = _binding!!
     private var coverUriSelect: Uri? = null

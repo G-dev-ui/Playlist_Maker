@@ -24,4 +24,17 @@ interface PlaylistsInteractor {
 
     suspend fun getCover(): String
 
+    suspend fun getAllTracks(tracksIdsList: List<Long>): List<Track>
+
+    suspend fun deleteTrackFromPlaylist(playlistId: Int, trackId: Long)
+
+    suspend fun trackCountDecrease(playlistId: Int)
+
+    suspend fun modifyData(
+        name: String,
+        description: String,
+        cover: String,
+        coverUri: Uri?,
+        originalPlayList: Playlist
+    )
 }

@@ -13,6 +13,7 @@ import com.example.playlist_maker.databinding.FragmentPlayListBinding
 import com.example.playlist_maker.main.ui.MainActivity
 import com.example.playlist_maker.music_library.domain.Playlist
 import com.example.playlist_maker.music_library.domain.PlaylistState
+import com.example.playlist_maker.util.CURRENT_PLAYLIST
 
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -110,6 +111,14 @@ class PlayListFragment : Fragment(), PlaylistsViewHolder.ClickListener {
         }
     }
     override fun onClick(playlist: Playlist) {
+
+        val bundle = Bundle().apply {
+            putParcelable(CURRENT_PLAYLIST, playlist)
+        }
+        findNavController().navigate(
+            R.id.action_mediaLibraryFragment_to_currentPlaylistFragment,
+            bundle
+        )
     }
 
 }

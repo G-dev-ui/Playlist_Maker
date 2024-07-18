@@ -12,6 +12,7 @@ class PlaylistsDbConverter {
             playlist.description,
             playlist.coverPath,
             playlist.tracksIds,
+            playlist.tracks,
             playlist.tracksAmount,
             playlist.imageUri
         )
@@ -24,6 +25,7 @@ class PlaylistsDbConverter {
             playlist.description,
             playlist.coverPath,
             playlist.tracksIds,
+            playlist.tracks,
             playlist.tracksAmount,
             playlist.imageUri
         )
