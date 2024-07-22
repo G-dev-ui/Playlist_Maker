@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/yandex_light_gray">
+        android:background="@color/yandex_light_gray"
+        >
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cover_card_view_current_playlist"
@@ -101,7 +101,8 @@
             android:layout_marginTop="@dimen/border_padding"
             android:src="@drawable/share_black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/full_time_current_playlist" />
+            app:layout_constraintTop_toBottomOf="@id/full_time_current_playlist"
+            />
 
         <ImageView
             android:id="@+id/menu_dots_current_playlist"
@@ -111,7 +112,8 @@
             android:layout_marginTop="@dimen/border_padding"
             android:src="@drawable/ic_dots_menu"
             app:layout_constraintStart_toEndOf="@id/share_current_playlist"
-            app:layout_constraintTop_toBottomOf="@id/full_time_current_playlist" />
+            app:layout_constraintTop_toBottomOf="@id/full_time_current_playlist"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

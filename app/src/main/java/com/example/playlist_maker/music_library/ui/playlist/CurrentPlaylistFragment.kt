@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.playlist_maker.R
@@ -46,13 +47,17 @@ class CurrentPlaylistFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        playlist = (arguments?.getParcelable(CURRENT_PLAYLIST) as? Playlist)!!
+        arguments?.getParcelable<Playlist>(CURRENT_PLAYLIST)?.let {
+            playlist = it
+        } ?: run {
+            findNavController().navigateUp()
+        }
 
         adapter.itemClickListener = {
             openAudioPlayer(it)
         }
         adapter.itemLongClickListener = {
-            showDialog(playlist, it.trackId?.toLong() ?: 0)
+            showDialog(playlist, it.trackId.toLong())
         }
 
         (activity as? MainActivity)?.hideNavBar()
@@ -63,7 +68,7 @@ class CurrentPlaylistFragment : Fragment() {
 
         val playlistId = playlist.id
         val screenHeight = resources.displayMetrics.heightPixels
-        val allowableHeight = (screenHeight * 0.25).toInt()
+        val allowableHeight = (screenHeight * 0.13).toInt()
         val bottomSheetBehavior =
             BottomSheetBehavior.from(binding.bottomMenuCurrentPlaylist).apply {
                 state = BottomSheetBehavior.STATE_HIDDEN
@@ -84,13 +89,13 @@ class CurrentPlaylistFragment : Fragment() {
                 when (newState) {
                     BottomSheetBehavior.STATE_HIDDEN -> {
                         bottomSheetBehaviorPlaylist.isHideable = false
-                        binding.menuBottomSheetOverlay.visibility = View.GONE
+                        binding.menuBottomSheetOverlay.isVisible = false
                     }
 
                     else -> {
                         bottomSheetBehaviorPlaylist.isHideable = true
                         bottomSheetBehaviorPlaylist.state = BottomSheetBehavior.STATE_HIDDEN
-                        binding.menuBottomSheetOverlay.visibility = View.VISIBLE
+                        binding.menuBottomSheetOverlay.isVisible = true
                     }
                 }
             }
@@ -164,12 +169,19 @@ class CurrentPlaylistFragment : Fragment() {
                 showContent(it)
                 vm.playlistAllTime()
             }
+            checkAndShowNoTracksMessage()
+        }
+
+
+        vm.observeMessage().observe(viewLifecycleOwner) { message ->
+
+            shareMessage(message)
         }
     }
 
     override fun onResume() {
         super.onResume()
-
+        checkAndShowNoTracksMessage()
         if (playlist.tracksAmount == 0) {
             binding.noTracksInPlaylist.visibility = View.VISIBLE
         } else {
@@ -213,37 +225,16 @@ class CurrentPlaylistFragment : Fragment() {
             ).show()
             return
         }
-        val message = formMessage()
+        vm.formMessage()
+    }
+
+    private fun shareMessage(message: String) {
         val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, message)
             type = "text/plain"
         }
         startActivity(Intent.createChooser(intent, null))
-    }
-
-    private fun formMessage(): String {
-        val name = playlist.name
-        val descript = playlist.description
-        val tracks = vm.observePlaylistTracks().value ?: emptyList()
-        val stringBuilder = StringBuilder()
-        with(stringBuilder) {
-            append("$name\n")
-            append("$descript\n")
-            append("${countTracks(tracks.size)}\n")
-        }
-        for ((index, track) in tracks.withIndex()) {
-            val trackTimeMillis = track.trackTimeMillis.toLongOrNull()
-            val formattedTime = if (trackTimeMillis != null) {
-                SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)
-            } else {
-                "00:00"
-            }
-            stringBuilder.append(
-                "${index + 1}. ${track.artistName} - ${track.trackName} ($formattedTime)\n"
-            )
-        }
-        return stringBuilder.toString()
     }
 
     private fun renderCurrentPlaylist() {
@@ -268,13 +259,12 @@ class CurrentPlaylistFragment : Fragment() {
     private fun countTracks(count: Int): String {
         val countTrack = context?.resources?.getQuantityString(R.plurals.track_count, count)
         return "$count $countTrack"
-
     }
 
     private fun showContent(tracks: List<Track>) {
         binding.rvCurrentPlaylist.visibility = View.VISIBLE
         with(adapter) {
-            updateTracks(tracks)
+            adapter.updateTracks(tracks)
             notifyItemRangeChanged(0, tracks.size)
         }
     }
@@ -303,6 +293,14 @@ class CurrentPlaylistFragment : Fragment() {
                 }
             }
             .show()
+    }
+
+    private fun checkAndShowNoTracksMessage() {
+        if (vm.observePlaylistTracks().value.isNullOrEmpty()) {
+            binding.noTracksInPlaylist.visibility = View.VISIBLE
+        } else {
+            binding.noTracksInPlaylist.visibility = View.GONE
+        }
     }
 
     override fun onDestroyView() {

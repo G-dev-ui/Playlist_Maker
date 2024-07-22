@@ -27,7 +27,8 @@ class MediaPlayerViewModel(
     companion object {
         private const val UPDATE_POSITION_DELAY = 300L
     }
-
+    var currentTrackPosition: Long = 0L
+    var isPlaying: Boolean = false
     private var playerState = MediaPlayerState.PREPARED
     private val stateLiveData = MutableLiveData<PlayerState>()
     fun observeState(): LiveData<PlayerState> = stateLiveData
@@ -54,26 +55,38 @@ class MediaPlayerViewModel(
         }
     }
 
+    fun saveCurrentPosition() {
+        currentTrackPosition = mediaPlayerRepository.getCurrentPosition().toLong()
+    }
+
+    fun seekTo(position: Long) {
+        currentTrackPosition = position
+        mediaPlayerRepository.seekTo(position.toInt())
+    }
+
     fun playbackControl() {
         when (playerState) {
             MediaPlayerState.PLAYING -> {
+                saveCurrentPosition()
                 mediaPlayerRepository.pauseMediaPlayer()
                 stopUpdatingTrackPosition()
                 playerState = MediaPlayerState.PAUSED
                 renderState(PlayerState.Pause)
+                isPlaying = false
             }
             MediaPlayerState.PREPARED, MediaPlayerState.PAUSED -> {
+                mediaPlayerRepository.seekTo(currentTrackPosition.toInt())
                 mediaPlayerRepository.startMediaPlayer()
                 startUpdatingTrackPosition()
                 playerState = MediaPlayerState.PLAYING
                 renderState(PlayerState.Playing)
+                isPlaying = true
             }
             else -> {
                 return
             }
         }
     }
-
     fun preparePlayer(trackUrl: String): MediaPlayerState {
         mediaPlayerRepository.prepareMediaPlayer(trackUrl, onPrepared = {
             playerState = MediaPlayerState.PREPARED
@@ -132,23 +145,19 @@ class MediaPlayerViewModel(
     }
 
     fun inPlaylist(playlist: Playlist, trackId: Long): Boolean {
-        return playlist.tracksIds.contains(trackId.toString())
+        var data = false
+        for (track in playlist.tracks) {
+            if (track == trackId) data = true
+        }
+        return data
     }
-  fun clickOnAddtoPlaylist(playlist: Playlist, track: Track) {
-      viewModelScope.launch {
-          val updatedPlaylists = playlistsInteractor.getPlaylists()
-          val updatedPlaylist = updatedPlaylists.firstOrNull { it.id == playlist.id }
-          if (updatedPlaylist != null && !inPlaylist(updatedPlaylist, track.trackId?.toLong() ?: 0)) {
-              playlistsInteractor.addTrackToPlaylist(updatedPlaylist, track)
-              updatedPlaylist.tracksIds = updatedPlaylist.tracksIds + "," + track.trackId.toString()
-              updatedPlaylist.tracksAmount = updatedPlaylist.tracksIds.split(",").filter { it.isNotEmpty() }.size
-              playlistsInteractor.updatePlaylist(updatedPlaylist)
-              _playlistsState.postValue(PlaylistState.Data(updatedPlaylists, "added", playlist.name))
-          } else {
-              _playlistsState.postValue(PlaylistState.Data(updatedPlaylists, "exists", playlist.name))
-          }
-      }
-  }
+    fun clickOnAddtoPlaylist(playlist: Playlist, track: Track) {
+        viewModelScope.launch {
+            playlist.tracksAmount = playlist.tracks.size + 1
+            playlistsInteractor.addTrackToPlaylist(playlist, track)
+            _playlistsState.postValue(PlaylistState.Data(playlistsInteractor.getPlaylists()))
+        }
+    }
 
     fun getPlaylists() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -165,7 +174,11 @@ class MediaPlayerViewModel(
         }
     }
 
-    private fun Long.convertLongToTimeMillis(): String {
+    fun isPrepared(): Boolean {
+        return playerState == MediaPlayerState.PREPARED || playerState == MediaPlayerState.PAUSED
+    }
+
+     fun Long.convertLongToTimeMillis(): String {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(this)
     }
 }

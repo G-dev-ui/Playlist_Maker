@@ -43,6 +43,14 @@ open class NewPlaylistFragment : Fragment() {
 
         (activity as? MainActivity)?.hideNavBar()
 
+
+        if (savedInstanceState != null) {
+            coverUriSelect = savedInstanceState.getParcelable("coverUriSelect")
+            coverUriSelect?.let {
+                binding.newPlaylistCover.setImageURI(it)
+            }
+        }
+
         vm.savedCoverUri.observe(viewLifecycleOwner) { savedUri ->
             coverUriSelect = savedUri
         }
@@ -52,28 +60,27 @@ open class NewPlaylistFragment : Fragment() {
                 if (previewUri != null) {
                     vm.saveCoverToStorage(previewUri, requireContext())
                     binding.newPlaylistCover.setImageURI(previewUri)
+                    coverUriSelect = previewUri
                     showedDialog = true
-                } else {
-
                 }
             }
 
         binding.newPlaylistCover.setOnClickListener {
-            chooseCover.launch(PickVisualMediaRequest((ActivityResultContracts.PickVisualMedia.ImageOnly)))
+            chooseCover.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         binding.createButton.setOnClickListener {
             newPlaylistAdd(coverUriSelect)
             Toast.makeText(
                 requireContext(),
-                "Плейлист ${binding.newPlaylistNameEditTxt.text.toString()} создан",
+                "Плейлист ${binding.newPlaylistNameEditTxt.text} создан",
                 Toast.LENGTH_SHORT
             ).show()
             findNavController().navigateUp()
         }
 
-        binding.newPlaylistNameEditTxt.doOnTextChanged { text, start, before, count ->
-            if (text!!.isNotEmpty()) {
+        binding.newPlaylistNameEditTxt.doOnTextChanged { text, _, _, _ ->
+            if (!text.isNullOrEmpty()) {
                 val color = ContextCompat.getColor(requireContext(), R.color.background_main)
                 showedDialog = true
                 binding.createButton.isEnabled = true
@@ -83,10 +90,9 @@ open class NewPlaylistFragment : Fragment() {
                 binding.createButton.isEnabled = false
                 binding.createButton.setBackgroundColor(color)
             }
-
         }
 
-        binding.toolbarNewPlaylist.setNavigationOnClickListener  {
+        binding.toolbarNewPlaylist.setNavigationOnClickListener {
             if (showedDialog) {
                 showDialog()
             } else {
@@ -112,15 +118,15 @@ open class NewPlaylistFragment : Fragment() {
         MaterialAlertDialogBuilder(requireContext(), R.style.custom_alert_dialog_theme)
             .setTitle(getString(R.string.dialog_title))
             .setMessage(getString(R.string.dialog_message))
-            .setNegativeButton(getString(R.string.dialog_negative_btn)) { dialog, wich ->
+            .setNegativeButton(getString(R.string.dialog_negative_btn)) { dialog, _ ->
             }
-            .setPositiveButton(getString(R.string.dialog_positive_btn)) { dialog, witch ->
+            .setPositiveButton(getString(R.string.dialog_positive_btn)) { dialog, _ ->
                 findNavController().navigateUp()
                 (activity as? MainActivity)?.showNavBar()
-
             }
             .show()
     }
+
     private fun newPlaylistAdd(coverUri: Uri?) {
         val playlistName = binding.newPlaylistNameEditTxt.text.toString()
         val playlistDescription = binding.newPlaylistDescriptionEditTxt.text.toString()
@@ -133,5 +139,11 @@ open class NewPlaylistFragment : Fragment() {
         if (::callback.isInitialized) {
             callback.remove()
         }
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        coverUriSelect?.let { outState.putParcelable("coverUriSelect", it) }
     }
 }

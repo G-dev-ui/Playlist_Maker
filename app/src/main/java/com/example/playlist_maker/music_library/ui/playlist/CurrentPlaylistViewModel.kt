@@ -9,6 +9,8 @@ import com.example.playlist_maker.music_library.domain.PlaylistsInteractor
 import com.example.playlist_maker.player.domain.Track
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class CurrentPlaylistViewModel(private val playlistsInteractor: PlaylistsInteractor) : ViewModel() {
 
@@ -27,6 +29,9 @@ class CurrentPlaylistViewModel(private val playlistsInteractor: PlaylistsInterac
     private val _playlistTime = MutableLiveData<Long>()
     fun observePlaylistAllTime(): LiveData<Long> = _playlistTime
 
+
+    private val _message = MutableLiveData<String>()
+    fun observeMessage(): LiveData<String> = _message
 
     fun playlistAllTime() {
         _playlistTracks.value?.let { tracks ->
@@ -89,6 +94,31 @@ class CurrentPlaylistViewModel(private val playlistsInteractor: PlaylistsInterac
     private suspend fun trackCountDecrease(playlistId: Int) {
         playlistsInteractor.trackCountDecrease(playlistId)
     }
+
+    fun formMessage() {
+        val name = _playlistId.value?.name ?: ""
+        val descript = _playlistId.value?.description ?: ""
+        val tracks = _playlistTracks.value ?: emptyList()
+        val stringBuilder = StringBuilder()
+        with(stringBuilder) {
+            append("$name\n")
+            append("$descript\n")
+            append("${tracks.size} треков\n")
+        }
+        for ((index, track) in tracks.withIndex()) {
+            val trackTimeMillis = track.trackTimeMillis?.toLongOrNull()
+            val formattedTime = if (trackTimeMillis != null) {
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)
+            } else {
+                "00:00"
+            }
+            stringBuilder.append(
+                "${index + 1}. ${track.artistName} - ${track.trackName} ($formattedTime)\n"
+            )
+        }
+        _message.postValue(stringBuilder.toString())
+    }
+
 }
 
 

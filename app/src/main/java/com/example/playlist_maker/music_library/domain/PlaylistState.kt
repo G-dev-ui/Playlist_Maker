@@ -6,4 +6,6 @@ sealed interface PlaylistState {
     data object Empty : PlaylistState
 
     data object Load : PlaylistState
+
+
 }
