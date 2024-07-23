@@ -1,6 +1,7 @@
 package com.example.playlist_maker.search.ui
 
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -27,6 +28,7 @@ class TrackAdapter : RecyclerView.Adapter<TrackViewHolder>() {
         tracks.clear()
         tracks.addAll(newTracks)
         notifyDataSetChanged()
+        Log.d("Adapter", "Tracks updated: $tracks")
     }
 
     fun setOnItemLongClickListener(listener: (Track) -> Unit) {

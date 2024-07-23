@@ -8,8 +8,11 @@
     <dimen name="pudding_all">16sp</dimen>
     <dimen name="borders24_line">24dp</dimen>
     <dimen name="borders16_line">16dp</dimen>
-
-
+    <dimen name="title_top_margin">24dp</dimen>
+    <dimen name="mid_padding">8dp</dimen>
+    <dimen name="bottom_line_width">50dp</dimen>
+    <dimen name="bottom_line_height">4dp</dimen>
+    <dimen name="border_padding">16dp</dimen>
     <dimen name="ap_margin_mid">24dp</dimen>
     <dimen name="all_layouts_padding">4dp</dimen>
     <dimen name="ap_placeholder_top">26dp</dimen>
@@ -18,4 +21,5 @@
     <dimen name="ap_margin_30">30dp</dimen>
     <dimen name="ap_text_padding">8dp</dimen>
     <dimen name="ap_text_size_13">13sp</dimen>
+    <dimen name="title_bottom_margin_top">6dp</dimen>
 </resources>

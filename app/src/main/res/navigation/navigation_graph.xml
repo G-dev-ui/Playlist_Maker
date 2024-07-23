@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_mediaLibraryFragment_to_audioPlayerFragment"
             app:destination="@id/audioPlayerFragment" />
+        <action
+            android:id="@+id/action_mediaLibraryFragment_to_currentPlaylistFragment"
+            app:destination="@id/currentPlaylistFragment" />
 
 
     </fragment>
@@ -66,4 +69,21 @@
             android:id="@+id/action_audioPlayerFragment_to_newPlaylistFragment"
             app:destination="@id/newPlaylistFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/currentPlaylistFragment"
+        android:name="com.example.playlist_maker.music_library.ui.playlist.CurrentPlaylistFragment"
+        android:label="CurrentPlaylistFragment"
+        tools:layout="@layout/fragment_current_playlist">
+    <action
+        android:id="@+id/action_currentPlaylistFragment_to_audioPlayerFragment"
+        app:destination="@id/audioPlayerFragment" />
+    <action
+        android:id="@+id/action_currentPlaylistFragment_to_modifyPlaylistFragment"
+        app:destination="@id/modifyPlaylistFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/modifyPlaylistFragment"
+        android:name="com.example.playlist_maker.music_library.ui.playlist.ModifyPlaylistFragment"
+        android:label="ModifyPlaylistFragment" />
 </navigation>

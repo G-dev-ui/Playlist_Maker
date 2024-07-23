@@ -40,7 +40,6 @@
     <string name="dialog_title" translatable="false">Завершить создание плейлиста?</string>
     <string name="dialog_message" translatable="false">Все несохраненные данные будут потеряны
 </string>
-
     <string name="ap_duration" translatable="false">Длительность</string>
     <string name="ap_album" translatable="false">Альбом</string>
     <string name="ap_year" translatable="false">Год</string>
@@ -52,5 +51,15 @@
     <string name="track_several" translatable="false">трека</string>
     <string name="added_to_playlist" translatable="false">Трек добавлен</string>
     <string name="already_in_playlist" translatable="false">Трек, уже добавленный в плейлист</string>
-
+    <string name="menu_change" translatable="false">Изменить</string>
+    <string name="menu_delete" translatable="false">Удалить</string>
+    <string name="menu_share" translatable="false">Поделиться</string>
+    <string name="no_tracks_in_playlist" translatable="false">В плейлист еще не добавлен\n ни один трек</string>
+    <string name="delete_playlist_dialog" translatable="false">Хотите удалить плейлист?</string>
+    <string name="answer_no" translatable="false">Нет</string>
+    <string name="answer_yes" translatable="false">ДА</string>
+    <string name="on_tracks_to_share" translatable="false">В этом плейлисте нет списка треков, которым можно поделиться</string>
+    <string name="delete_track_dialog" translatable="false">Хотите удалить трек?</string>
+    <string name="edit_modify" translatable="false">Редактировать</string>
+    <string name="save_modify" translatable="false">Сохранить</string>
 </resources>

@@ -162,7 +162,7 @@ class SearchFragment : Fragment() {
 
         refreshButton.setOnClickListener {
             val lastEnteredText = searchBar.text.toString()
-            viewModel.searchDebounce(changedText = lastEnteredText)
+            viewModel.searchDebounce(changedText = lastEnteredText, force = true)
         }
     }
 

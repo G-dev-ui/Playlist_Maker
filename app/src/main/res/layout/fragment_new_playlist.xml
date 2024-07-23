@@ -6,10 +6,9 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:id="@+id/cl_root"
     >
 
@@ -17,7 +16,7 @@
         android:id="@+id/toolbarNewPlaylist"
         style="@style/toolbaraudio"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/all_layouts_padding"
         android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -99,7 +98,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="17dp"
         android:layout_marginEnd="17dp"
-        android:layout_marginBottom="32dp"
         android:backgroundTint="@color/gray1"
         android:enabled="false"
         android:padding="10dp"
@@ -110,7 +108,10 @@
         app:cornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="@id/cl_root"
         app:layout_constraintEnd_toEndOf="@id/cl_root"
-        app:layout_constraintStart_toStartOf="@id/cl_root">
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/cl_root"
+        app:layout_constraintTop_toBottomOf="@+id/new_playlist_description_txt_layout"
+        app:layout_constraintVertical_bias="0.9">
 
     </Button>
 

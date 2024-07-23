@@ -24,6 +24,8 @@ import com.example.playlist_maker.music_library.domain.Playlist
 import com.example.playlist_maker.music_library.domain.PlaylistState
 import com.example.playlist_maker.player.domain.Track
 import com.example.playlist_maker.player.domain.getCoverArtwork
+import com.example.playlist_maker.util.convertLongToTimeMillis
+import com.example.playlist_maker.util.convertTimeStringToMillis
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.time.LocalDateTime
@@ -42,6 +44,8 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
     private val mediaViewModel by viewModel<MediaPlayerViewModel>()
     private lateinit var adapter: AudioPlayerAdapter
+    private var isPlaying = false
+    private var currentTrackPosition = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,10 +58,34 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         playButton = view.findViewById(R.id.playButton1)
         likeButton = view.findViewById(R.id.likeButton)
         durationTextView = view.findViewById(R.id.durationTextView1)
+        durationTextView.setText(R.string.durationSample2)
+        track = arguments?.getParcelable(SEARCH_QUERY_HISTORY)
+            ?: throw IllegalArgumentException("Track must be provided")
+
+
+        savedInstanceState?.let {
+            isPlaying = it.getBoolean("isPlaying")
+            val positionString = it.getString("currentTrackPosition")
+            if (positionString != null) {
+                currentTrackPosition = positionString.convertTimeStringToMillis()
+                durationTextView.text = positionString
+            }
+        }
+
+        mediaViewModel.preparePlayer(track.previewUrl ?: "")
+
+
+        if (mediaViewModel.isPrepared()) {
+            mediaViewModel.seekTo(currentTrackPosition)
+            if (isPlaying) {
+                mediaViewModel.playbackControl()
+            }
+        }
+
+
 
         mediaViewModel.observeState().observe(viewLifecycleOwner) { render(it) }
 
@@ -75,7 +103,6 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         backButton.setOnClickListener {
             activity?.onBackPressed()
         }
-        track = arguments?.getParcelable<Track>(SEARCH_QUERY_HISTORY) as Track
 
         val coverImageView = view.findViewById<ImageView>(R.id.album_cover)
 
@@ -154,13 +181,21 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
     override fun onPause() {
         super.onPause()
-        playButton.setImageResource(R.drawable.play_buttom)
+        if (isPlaying) {
+            mediaViewModel.saveCurrentPosition()
+        }
         mediaViewModel.releaseMediaPlayer()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mediaViewModel.releaseMediaPlayer()
+        _binding = null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isPlaying", isPlaying)
+        outState.putString("currentTrackPosition", currentTrackPosition.convertLongToTimeMillis())
     }
 
     private fun render(state: PlayerState) {
@@ -182,14 +217,23 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
     private fun PlayerStart() {
         playButton.setImageResource(R.drawable.paus_buttom)
+        isPlaying = true
     }
 
     private fun PlayerPaused() {
         playButton.setImageResource(R.drawable.play_buttom)
+        isPlaying = false
     }
 
     private fun TrackPositionChanged(position: String) {
-        durationTextView.text = position
+        try {
+            currentTrackPosition = position.convertTimeStringToMillis()
+            durationTextView.text = position
+        } catch (e: IllegalArgumentException) {
+
+            currentTrackPosition = 0L
+            durationTextView.setText(R.string.durationSample2)
+        }
     }
 
     private fun PreparedPlayer() {
@@ -200,42 +244,52 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
     private fun TrackComplete() {
         playButton.setImageResource(R.drawable.play_buttom)
         durationTextView.setText(R.string.durationSample2)
+        isPlaying = false
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun playlistStateManage(state: PlaylistState) {
         when (state) {
             is PlaylistState.Empty -> {
                 binding.bottomSheetRecyclerView.visibility = View.GONE
             }
             is PlaylistState.Data -> {
+                val playlists = state.playlists
                 binding.bottomSheetRecyclerView.visibility = View.VISIBLE
-                adapter.playlists = state.playlists as ArrayList<Playlist>
+                adapter.playlists = playlists as ArrayList<Playlist>
                 adapter.notifyDataSetChanged()
-
-                when (state.status) {
-                    "added" -> {
-                        Toast.makeText(
-                            requireContext().applicationContext,
-                            "${getString(R.string.added_to_playlist)} ${state.playlistName}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).state = BottomSheetBehavior.STATE_HIDDEN
-                    }
-                    "exists" -> {
-                        Toast.makeText(
-                            requireContext().applicationContext,
-                            "${getString(R.string.already_in_playlist)} ${state.playlistName}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
             }
             else -> {}
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onClick(playlist: Playlist) {
-        mediaViewModel.clickOnAddtoPlaylist(playlist, track)
+        if (!mediaViewModel.inPlaylist(
+                playlist = playlist,
+                trackId = track.trackId?.toLong() ?: 0
+            )
+        ) {
+            mediaViewModel.clickOnAddtoPlaylist(playlist = playlist, track = track)
+            Toast.makeText(
+                requireContext().applicationContext,
+                "${getString(R.string.added_to_playlist)} ${playlist.name}",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+            playlist.tracksAmount = playlist.tracks.size
+            BottomSheetBehavior.from(binding.bottomSheetAudioPlayer).apply {
+                state = BottomSheetBehavior.STATE_HIDDEN
+            }
+        } else {
+            Toast.makeText(
+                requireContext().applicationContext,
+                "${getString(R.string.already_in_playlist)} ${playlist.name}",
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        }
+        adapter.notifyDataSetChanged()
     }
 
     override fun onResume() {

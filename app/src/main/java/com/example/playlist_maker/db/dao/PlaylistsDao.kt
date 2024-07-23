@@ -29,8 +29,14 @@ interface PlaylistsDao {
     suspend fun getPlaylistById(playlistId: Int): PlaylistEntity
 
     @Query("UPDATE PLAYLISTS_TABLET SET tracksAmount = tracksAmount - 1 WHERE id = :playlistId")
-    suspend fun decrementPlaylistTrackCount(playlistId: Int)
+    suspend fun trackCountDecrease(playlistId: Int)
 
     @Delete
     suspend fun deletePlaylist(playlist: PlaylistEntity)
+
+    @Query("SELECT * FROM TRACKS_IN_PLAYLIST")
+    fun getAllPlaylistTracks(): List<TrackToPlaylistEntity>
+
+    @Query("DELETE FROM TRACKS_IN_PLAYLIST WHERE trackId = :trackId")
+    suspend fun deleteTrackById(trackId: Long)
 }

@@ -20,13 +20,10 @@ class TracksSearchViewModel(
     private val searchHistoryRepository: SearchHistoryRepository
 ) : ViewModel() {
 
-
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
-
     }
-
 
     private val handler = Handler(Looper.getMainLooper())
     private var historyTrackList: List<Track> = searchHistoryRepository.getSearchHistory()
@@ -43,20 +40,21 @@ class TracksSearchViewModel(
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 
-    fun searchDebounce(changedText: String) {
-        if (lastSearchText == changedText) {
+    private var forceSearch: Boolean = false
+
+    fun searchDebounce(changedText: String, force: Boolean = false) {
+        if (!force && lastSearchText == changedText) {
             return
         }
-
         lastSearchText = changedText
+        forceSearch = force
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_DELAY)
-           performSearch(changedText)
+            performSearch(changedText)
         }
     }
-
 
     private fun performSearch(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
@@ -84,12 +82,10 @@ class TracksSearchViewModel(
         }
     }
 
-
     fun clearHistory() {
         historyTrackList = emptyList()
         searchHistoryRepository.clearSearchHistory()
         renderState(TracksState.Empty)
-
     }
 
     fun addToSearchHistory(track: Track) {
@@ -104,16 +100,14 @@ class TracksSearchViewModel(
     }
 
     fun showSearchHistory() {
-          if (historyTrackList.isEmpty()) {
+        if (historyTrackList.isEmpty()) {
             renderState(TracksState.Empty)
         } else {
             renderState(TracksState.History(historyTrackList))
         }
     }
 
-
     private fun renderState(state: TracksState) {
         stateLiveData.postValue(state)
     }
-
 }

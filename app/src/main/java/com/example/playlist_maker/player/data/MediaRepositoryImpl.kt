@@ -38,4 +38,8 @@ class MediaRepositoryImpl( private val mediaPlayer : MediaPlayer) : MediaReposit
     override fun getCurrentPosition(): Int {
         return mediaPlayer.currentPosition
     }
+
+    override fun seekTo(position: Int) {
+        mediaPlayer.seekTo(position)
+    }
 }

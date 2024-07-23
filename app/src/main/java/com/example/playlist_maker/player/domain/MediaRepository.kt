@@ -7,4 +7,6 @@ package com.example.playlist_maker.player.domain
         fun releaseMediaPlayer()
         fun isPlaying(): Boolean
         fun getCurrentPosition(): Int
+
+        fun seekTo(position: Int)
     }
