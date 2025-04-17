@@ -2,6 +2,7 @@ package com.example.playlist_maker.player.ui
 
 
 import android.icu.text.SimpleDateFormat
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,6 +28,7 @@ class MediaPlayerViewModel(
     companion object {
         private const val UPDATE_POSITION_DELAY = 300L
     }
+
     var currentTrackPosition: Long = 0L
     var isPlaying: Boolean = false
     private var playerState = MediaPlayerState.PREPARED
@@ -41,13 +43,13 @@ class MediaPlayerViewModel(
 
     private val _playlistsState = MutableLiveData<PlaylistState>()
     val playlistsState: LiveData<PlaylistState> = _playlistsState
-
+    var currentTrack: Track? = null
 
 
     fun isFavorite(track: Track) {
         viewModelScope.launch {
             favoriteTracksInteractor
-                .isFavoriteTrack(track.trackId ?: 0)
+                .isFavoriteTrack(track.trackId)
                 .collect { isFavorite ->
                     isFavoriteTrack = isFavorite
                     _favoriteState.postValue(FavoriteState(isFavorite))
@@ -64,55 +66,92 @@ class MediaPlayerViewModel(
         mediaPlayerRepository.seekTo(position.toInt())
     }
 
+    fun pauseMediaPlayer() {
+        if (playerState == MediaPlayerState.PLAYING) {
+            saveCurrentPosition()
+            mediaPlayerRepository.pauseMediaPlayer()
+            playerState = MediaPlayerState.PAUSED
+            isPlaying = false
+            renderState(PlayerState.Pause)
+            stopUpdatingTrackPosition()
+        }
+    }
+
+    fun startMediaPlayer() {
+        if (playerState == MediaPlayerState.PREPARED || playerState == MediaPlayerState.PAUSED) {
+            mediaPlayerRepository.seekTo(currentTrackPosition.toInt())
+            mediaPlayerRepository.startMediaPlayer()
+            playerState = MediaPlayerState.PLAYING
+            isPlaying = true
+            renderState(PlayerState.Playing)
+            startUpdatingTrackPosition()
+        }
+    }
+
+
     fun playbackControl() {
         when (playerState) {
             MediaPlayerState.PLAYING -> {
                 saveCurrentPosition()
                 mediaPlayerRepository.pauseMediaPlayer()
-                stopUpdatingTrackPosition()
                 playerState = MediaPlayerState.PAUSED
                 renderState(PlayerState.Pause)
                 isPlaying = false
+                stopUpdatingTrackPosition()
             }
+
             MediaPlayerState.PREPARED, MediaPlayerState.PAUSED -> {
                 mediaPlayerRepository.seekTo(currentTrackPosition.toInt())
                 mediaPlayerRepository.startMediaPlayer()
-                startUpdatingTrackPosition()
                 playerState = MediaPlayerState.PLAYING
                 renderState(PlayerState.Playing)
                 isPlaying = true
+                startUpdatingTrackPosition() // Это пока оставим
             }
-            else -> {
-                return
-            }
+
+            else -> return
         }
     }
-    fun preparePlayer(trackUrl: String): MediaPlayerState {
-        mediaPlayerRepository.prepareMediaPlayer(trackUrl, onPrepared = {
-            playerState = MediaPlayerState.PREPARED
-            renderState(PlayerState.Prepared)
-        }, onCompletion = {
-            playerState = MediaPlayerState.PREPARED
-            renderState(PlayerState.Complete)
-        })
+
+    fun preparePlayer(trackUrl: String, track: Track): MediaPlayerState {
+        currentTrack = track // Устанавливаем текущий трек
+
+        mediaPlayerRepository.prepareMediaPlayer(
+            trackUrl,
+            onPrepared = {
+                playerState = MediaPlayerState.PREPARED
+                renderState(PlayerState.Prepared)
+
+                if (mediaPlayerRepository.isPlaying()) {
+                    playerState = MediaPlayerState.PLAYING
+                    renderState(PlayerState.Playing)
+                    isPlaying = true
+                    startUpdatingTrackPosition()
+                }
+            },
+            onCompletion = {
+                playerState = MediaPlayerState.PREPARED
+                renderState(PlayerState.Complete)
+                isPlaying = false
+                stopUpdatingTrackPosition()
+            }
+        )
+
         playerState = MediaPlayerState.PREPARED
         renderState(PlayerState.Prepared)
         return MediaPlayerState.PREPARED
     }
 
-    fun releaseMediaPlayer() {
-        mediaPlayerRepository.releaseMediaPlayer()
-        stopUpdatingTrackPosition()
-    }
-
     private fun startUpdatingTrackPosition() {
         updateJob = viewModelScope.launch {
+            Log.d("MediaPlayerViewModel", "startUpdatingTrackPosition started") // <-- добавь лог
             while (mediaPlayerRepository.isPlaying()) {
                 updateTrackTimer()
                 delay(UPDATE_POSITION_DELAY)
             }
         }
     }
+
 
     private fun stopUpdatingTrackPosition() {
         updateJob?.cancel()
@@ -133,7 +172,7 @@ class MediaPlayerViewModel(
     fun addToFavorite(track: Track) {
         viewModelScope.launch {
             isFavoriteTrack = if (isFavoriteTrack) {
-                favoriteTracksInteractor.deleteTrack(track.trackId?.toInt() ?: 0)
+                favoriteTracksInteractor.deleteTrack(track.trackId.toInt())
                 _favoriteState.postValue(FavoriteState(false))
                 false
             } else {
@@ -151,6 +190,7 @@ class MediaPlayerViewModel(
         }
         return data
     }
+
     fun clickOnAddtoPlaylist(playlist: Playlist, track: Track) {
         viewModelScope.launch {
             playlist.tracksAmount = playlist.tracks.size + 1
@@ -178,7 +218,7 @@ class MediaPlayerViewModel(
         return playerState == MediaPlayerState.PREPARED || playerState == MediaPlayerState.PAUSED
     }
 
-     fun Long.convertLongToTimeMillis(): String {
+    fun Long.convertLongToTimeMillis(): String {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(this)
     }
 }

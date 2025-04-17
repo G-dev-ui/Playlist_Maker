@@ -3,6 +3,7 @@ package com.example.playlist_maker.player.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,8 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
     private lateinit var adapter: AudioPlayerAdapter
     private var isPlaying = false
     private var currentTrackPosition = 0L
+    private lateinit var mediaNotificationManager: MediaNotificationManager
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,6 +61,8 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mediaNotificationManager = MediaNotificationManager(requireContext(), mediaViewModel)
+        ServiceLocator.mediaPlayerViewModel = mediaViewModel
         playButton = view.findViewById(R.id.playButton1)
         likeButton = view.findViewById(R.id.likeButton)
         durationTextView = view.findViewById(R.id.durationTextView1)
@@ -75,7 +80,8 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
             }
         }
 
-        mediaViewModel.preparePlayer(track.previewUrl ?: "")
+        mediaViewModel.preparePlayer(track.previewUrl ?: "", track)
+
 
 
         if (mediaViewModel.isPrepared()) {
@@ -87,7 +93,11 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
 
 
 
-        mediaViewModel.observeState().observe(viewLifecycleOwner) { render(it) }
+        mediaViewModel.observeState().observe(viewLifecycleOwner) { state ->
+            Log.d("AudioPlayerFragment", "render: $state") // <-- добавь лог
+            render(state)
+        }
+
 
         mediaViewModel.playlistsState.observe(viewLifecycleOwner) { state ->
             playlistStateManage(state)
@@ -118,7 +128,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         binding.trackNamePlayerActivity.text = track.trackName
         binding.artistNamePlayerActivity1.text = track.artistName
         binding.durationValue1.text = track.trackTimeMillis.toString()
-        binding.albumValue1.text = track.collectionName ?: ""
+        binding.albumValue1.text = track.collectionName
         binding.yearValue1.text = LocalDateTime.parse(
             track.releaseDate,
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -126,9 +136,9 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         binding.genreValue1.text = track.primaryGenreName
         binding.countryValue1.text = track.country
 
-        if (track.previewUrl?.isNotEmpty() == true) {
-            track.previewUrl?.let { mediaViewModel.preparePlayer(it) }
-        }
+        // if (track.previewUrl?.isNotEmpty() == true) {
+        //     track.previewUrl?.let { mediaViewModel.preparePlayer(it) }
+        // }
 
         playButton.setOnClickListener {
             mediaViewModel.playbackControl()
@@ -156,6 +166,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
                     BottomSheetBehavior.STATE_HIDDEN -> {
                         binding.bottomSheetOverlay.visibility = View.GONE
                     }
+
                     else -> {
                         adapter.notifyDataSetChanged()
                         binding.bottomSheetOverlay.visibility = View.VISIBLE
@@ -184,11 +195,11 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         if (isPlaying) {
             mediaViewModel.saveCurrentPosition()
         }
-        mediaViewModel.releaseMediaPlayer()
+        // mediaViewModel.pauseMediaPlayer()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
         _binding = null
     }
 
@@ -201,12 +212,28 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
     private fun render(state: PlayerState) {
         when (state) {
             is PlayerState.ChangePosition -> TrackPositionChanged(state.position)
-            is PlayerState.Prepared -> PreparedPlayer()
-            is PlayerState.Playing -> PlayerStart()
-            is PlayerState.Pause -> PlayerPaused()
-            is PlayerState.Complete -> TrackComplete()
+            is PlayerState.Prepared -> {
+                PreparedPlayer()
+                mediaNotificationManager.showNotification(false)
+            }
+
+            is PlayerState.Playing -> {
+                PlayerStart()
+                mediaNotificationManager.showNotification(true)
+            }
+
+            is PlayerState.Pause -> {
+                PlayerPaused()
+                mediaNotificationManager.showNotification(false)
+            }
+
+            is PlayerState.Complete -> {
+                TrackComplete()
+                mediaNotificationManager.cancelNotification()
+            }
         }
     }
+
 
     private fun like(isFavoriteState: FavoriteState) {
         when (isFavoriteState) {
@@ -229,7 +256,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
         try {
             currentTrackPosition = position.convertTimeStringToMillis()
             durationTextView.text = position
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
 
             currentTrackPosition = 0L
             durationTextView.setText(R.string.durationSample2)
@@ -253,12 +280,14 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
             is PlaylistState.Empty -> {
                 binding.bottomSheetRecyclerView.visibility = View.GONE
             }
+
             is PlaylistState.Data -> {
                 val playlists = state.playlists
                 binding.bottomSheetRecyclerView.visibility = View.VISIBLE
                 adapter.playlists = playlists as ArrayList<Playlist>
                 adapter.notifyDataSetChanged()
             }
+
             else -> {}
         }
     }
@@ -267,7 +296,7 @@ class AudioPlayerFragment : Fragment(), AudioPlayerViewHolder.ClickListener {
     override fun onClick(playlist: Playlist) {
         if (!mediaViewModel.inPlaylist(
                 playlist = playlist,
-                trackId = track.trackId?.toLong() ?: 0
+                trackId = track.trackId.toLong()
             )
         ) {
             mediaViewModel.clickOnAddtoPlaylist(playlist = playlist, track = track)
