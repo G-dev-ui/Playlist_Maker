@@ -1,45 +1,50 @@
 package com.example.playlist_maker.player.data
 
-import android.media.MediaPlayer
+import android.content.Context
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.playlist_maker.player.domain.MediaRepository
 
-class MediaRepositoryImpl( private val mediaPlayer : MediaPlayer) : MediaRepository {
+class MediaRepositoryImpl(context: Context) : MediaRepository {
 
+    private val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
 
     override fun prepareMediaPlayer(trackUrl: String, onPrepared: () -> Unit, onCompletion: () -> Unit) {
-        mediaPlayer.apply {
-            reset()
-            setDataSource(trackUrl)
-            setOnPreparedListener {
-                onPrepared.invoke()
+        val mediaItem = MediaItem.fromUri(trackUrl)
+        exoPlayer.setMediaItem(mediaItem)
+
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                when (state) {
+                    Player.STATE_READY -> onPrepared.invoke()
+                    Player.STATE_ENDED -> onCompletion.invoke()
+                }
             }
-            setOnCompletionListener {
-                onCompletion.invoke()
-            }
-            prepareAsync()
-        }
+        })
+        exoPlayer.prepare()
     }
 
     override fun startMediaPlayer() {
-        mediaPlayer.start()
+        exoPlayer.play()
     }
 
     override fun pauseMediaPlayer() {
-        mediaPlayer.pause()
+        exoPlayer.pause()
     }
 
     override fun releaseMediaPlayer() {
-        mediaPlayer.reset()
+        exoPlayer.release()
     }
     override fun isPlaying(): Boolean {
-        return mediaPlayer.isPlaying
+        return exoPlayer.isPlaying
     }
 
     override fun getCurrentPosition(): Int {
-        return mediaPlayer.currentPosition
+        return exoPlayer.currentPosition.toInt()
     }
 
     override fun seekTo(position: Int) {
-        mediaPlayer.seekTo(position)
+        exoPlayer.seekTo(position.toLong())
     }
 }
